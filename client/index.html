@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UNO 3D</title>
+
+<style>
+body{
+  margin:0;
+  background:#0d0d1a;
+  color:white;
+  font-family:Arial, sans-serif;
+  overflow:hidden;
+}
+
+#menu{
+  position:absolute;
+  inset:0;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  flex-direction:column;
+  gap:15px;
+  z-index:10;
+}
+
+input{
+  padding:12px;
+  border:none;
+  border-radius:10px;
+  width:220px;
+  font-size:16px;
+}
+
+button{
+  padding:12px 20px;
+  border:none;
+  border-radius:10px;
+  cursor:pointer;
+  font-size:16px;
+  font-weight:bold;
+}
+
+#createBtn{
+  background:#2473cc;
+  color:white;
+}
+
+#joinBtn{
+  background:#2ec05e;
+  color:white;
+}
+
+#startBtn{
+  background:#e8304a;
+  color:white;
+}
+
+#game{
+  display:none;
+  position:absolute;
+  inset:0;
+}
+
+#topBar{
+  position:absolute;
+  top:10px;
+  left:10px;
+  right:10px;
+  display:flex;
+  justify-content:space-between;
+  z-index:5;
+}
+
+#players{
+  display:flex;
+  gap:10px;
+}
+
+.player{
+  background:rgba(255,255,255,.1);
+  padding:10px;
+  border-radius:10px;
+}
+
+#center{
+  position:absolute;
+  inset:0;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:40px;
+}
+
+.pile{
+  width:100px;
+  height:140px;
+  border-radius:14px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-size:40px;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+#deck{
+  background:#1a1040;
+}
+
+#discard{
+  background:#333;
+}
+
+#hand{
+  position:absolute;
+  bottom:20px;
+  left:50%;
+  transform:translateX(-50%);
+  display:flex;
+  gap:10px;
+  overflow-x:auto;
+  padding:20px;
+  max-width:95vw;
+}
+
+.card{
+  width:90px;
+  height:130px;
+  border-radius:14px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-size:36px;
+  font-weight:bold;
+  cursor:pointer;
+  flex-shrink:0;
+  border:3px solid transparent;
+}
+
+.card.playable{
+  border-color:white;
+}
+
+.red{
+  background:#e8304a;
+}
+
+.yellow{
+  background:#f5c800;
+  color:black;
+}
+
+.green{
+  background:#2ec05e;
+}
+
+.blue{
+  background:#2473cc;
+}
+
+.wild{
+  background:linear-gradient(
+    45deg,
+    #e8304a,
+    #f5c800,
+    #2ec05e,
+    #2473cc
+  );
+}
+
+#notification{
+  position:absolute;
+  top:20px;
+  right:20px;
+  background:#e8304a;
+  padding:14px;
+  border-radius:10px;
+  display:none;
+  z-index:20;
+}
+
+#win{
+  position:absolute;
+  inset:0;
+  background:rgba(0,0,0,.85);
+  display:none;
+  justify-content:center;
+  align-items:center;
+  flex-direction:column;
+  gap:20px;
+  z-index:30;
+}
+</style>
+</head>
+<body>
+
+<div id="menu">
+
+  <h1>UNO 3D</h1>
+
+  <input id="nameInput" placeholder="Ton pseudo">
+
+  <button id="createBtn">
+    Créer une salle
+  </button>
+
+  <input id="roomInput" placeholder="Code salle">
+
+  <button id="joinBtn">
+    Rejoindre
+  </button>
+
+</div>
+
+<div id="game">
+
+  <div id="topBar">
+
+    <div id="roomCode"></div>
+
+    <div id="players"></div>
+
+    <button id="startBtn">
+      Démarrer
+    </button>
+
+  </div>
+
+  <div id="center">
+
+    <div class="pile" id="deck">
+      🂠
+    </div>
+
+    <div class="pile" id="discard">
+      ?
+    </div>
+
+  </div>
+
+  <div id="hand"></div>
+
+</div>
+
+<div id="notification"></div>
+
+<div id="win">
+
+  <h1 id="winnerText"></h1>
+
+  <button onclick="location.reload()">
+    Rejouer
+  </button>
+
+</div>
+
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+
+<script>
+
+const SERVER_URL =
+'https://TON-BACKEND.onrender.com';
+
+const socket = io(SERVER_URL,{
+  transports:['websocket','polling']
+});
+
+let myId = null;
+let currentRoom = null;
+let gameState = null;
+let isHost = false;
+
+const handDiv = document.getElementById('hand');
+const discardDiv = document.getElementById('discard');
+const playersDiv = document.getElementById('players');
+
+socket.on('connect',()=>{
+
+  myId = socket.id;
+
+  notify('Connecté ✓');
+});
+
+socket.on('disconnect',()=>{
+
+  notify('Déconnecté',true);
+});
+
+socket.on('roomCreated',({code,state})=>{
+
+  isHost = true;
+
+  currentRoom = code;
+
+  showGame();
+
+  updateState(state);
+});
+
+socket.on('roomJoined',({code,state})=>{
+
+  isHost = false;
+
+  currentRoom = code;
+
+  showGame();
+
+  updateState(state);
+});
+
+socket.on('gameState',state=>{
+
+  updateState(state);
+
+  if(state.phase === 'over'){
+    showWinner(state.winner);
+  }
+});
+
+socket.on('error',msg=>{
+
+  notify(msg,true);
+});
+
+document.getElementById('createBtn').onclick = ()=>{
+
+  const name =
+    document.getElementById('nameInput')
+    .value.trim() || 'Joueur';
+
+  socket.emit('createRoom',{
+    name,
+    botCount:1
+  });
+};
+
+document.getElementById('joinBtn').onclick = ()=>{
+
+  const name =
+    document.getElementById('nameInput')
+    .value.trim() || 'Joueur';
+
+  const code =
+    document.getElementById('roomInput')
+    .value.trim()
+    .toUpperCase();
+
+  if(!code){
+    return notify('Entre un code',true);
+  }
+
+  socket.emit('joinRoom',{
+    code,
+    name
+  });
+};
+
+document.getElementById('startBtn').onclick = ()=>{
+
+  socket.emit('startGame',{
+    code:currentRoom
+  });
+};
+
+document.getElementById('deck').onclick = ()=>{
+
+  socket.emit('drawCard',{
+    code:currentRoom
+  });
+};
+
+function updateState(state){
+
+  gameState = state;
+
+  document.getElementById('roomCode')
+    .textContent =
+    'Salle : ' + state.code;
+
+  document.getElementById('startBtn')
+    .style.display =
+    isHost && state.phase === 'lobby'
+      ? 'block'
+      : 'none';
+
+  renderPlayers(state);
+
+  renderTopCard(state.topCard);
+
+  renderHand();
+}
+
+function renderPlayers(state){
+
+  playersDiv.innerHTML = '';
+
+  state.players.forEach((p,i)=>{
+
+    const div = document.createElement('div');
+
+    div.className = 'player';
+
+    if(state.currentTurn === i){
+      div.style.border =
+        '2px solid yellow';
+    }
+
+    div.innerHTML = `
+      <div>${p.name}</div>
+      <div>${p.handCount} cartes</div>
+    `;
+
+    playersDiv.appendChild(div);
+  });
+}
+
+function renderTopCard(card){
+
+  if(!card) return;
+
+  discardDiv.className =
+    'pile ' +
+    (card.color === 'wild'
+      ? 'wild'
+      : card.color);
+
+  discardDiv.textContent =
+    getLabel(card.value);
+}
+
+function renderHand(){
+
+  handDiv.innerHTML = '';
+
+  const me =
+    gameState.players.find(
+      p=>p.id === myId
+    );
+
+  if(!me || !me.hand) return;
+
+  me.hand.forEach(card=>{
+
+    const div =
+      document.createElement('div');
+
+    div.className =
+      'card ' +
+      (card.color === 'wild'
+        ? 'wild'
+        : card.color);
+
+    const playable =
+      canPlay(
+        card,
+        gameState.topCard,
+        gameState.currentColor
+      );
+
+    if(playable){
+      div.classList.add('playable');
+    }
+
+    div.textContent =
+      getLabel(card.value);
+
+    div.onclick = ()=>{
+
+      if(!playable) return;
+
+      let chosenColor = null;
+
+      if(
+        card.value === 'wild' ||
+        card.value === 'wild4'
+      ){
+
+        chosenColor =
+          prompt(
+            'Couleur ? red/yellow/green/blue'
+          );
+
+        if(!chosenColor) return;
+      }
+
+      socket.emit('playCard',{
+        code:currentRoom,
+        cardId:card.id,
+        chosenColor
+      });
+    };
+
+    handDiv.appendChild(div);
+  });
+}
+
+function canPlay(card,top,currentColor){
+
+  if(!top) return true;
+
+  if(card.type === 'wild'){
+    return true;
+  }
+
+  if(card.color === currentColor){
+    return true;
+  }
+
+  if(card.value === top.value){
+    return true;
+  }
+
+  return false;
+}
+
+function getLabel(value){
+
+  if(value === 'skip') return '⊘';
+
+  if(value === 'reverse') return '↺';
+
+  if(value === 'draw2') return '+2';
+
+  if(value === 'wild') return '🌈';
+
+  if(value === 'wild4') return '+4';
+
+  return value;
+}
+
+function notify(msg,error=false){
+
+  const n =
+    document.getElementById('notification');
+
+  n.style.display = 'block';
+
+  n.style.background =
+    error
+      ? '#e8304a'
+      : '#2ec05e';
+
+  n.textContent = msg;
+
+  clearTimeout(n._t);
+
+  n._t = setTimeout(()=>{
+
+    n.style.display = 'none';
+
+  },3000);
+}
+
+function showGame(){
+
+  document.getElementById('menu')
+    .style.display = 'none';
+
+  document.getElementById('game')
+    .style.display = 'block';
+}
+
+function showWinner(name){
+
+  document.getElementById('winnerText')
+    .textContent =
+    name + ' a gagné !';
+
+  document.getElementById('win')
+    .style.display = 'flex';
+}
+
+</script>
+
+</body>
+</html>
