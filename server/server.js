@@ -3,25 +3,96 @@ const http = require('http');
 const { Server } = require('socket.io');
 const cors = require('cors');
 const { MongoClient } = require('mongodb');
+const fs = require('fs');
+const path = require('path');
+
+const envPath = path.join(__dirname, '.env');
+if (fs.existsSync(envPath)) {
+  for (const line of fs.readFileSync(envPath, 'utf8').split(/\r?\n/)) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('#')) continue;
+    const eq = trimmed.indexOf('=');
+    if (eq === -1) continue;
+    const key = trimmed.slice(0, eq).trim();
+    const value = trimmed.slice(eq + 1).trim();
+    if (key && process.env[key] === undefined) process.env[key] = value;
+  }
+}
 
 const app = express();
-app.use(cors({ origin: '*', methods: ['GET', 'POST', 'PUT', 'DELETE'] }));
+const asyncRoute = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
+for (const method of ['get', 'post', 'put', 'delete']) {
+  const original = app[method].bind(app);
+  app[method] = (path, ...handlers) =>
+    original(path, ...handlers.map(handler =>
+      handler && handler.constructor && handler.constructor.name === 'AsyncFunction'
+        ? asyncRoute(handler)
+        : handler
+    ));
+}
+
+app.use(cors({ origin: process.env.CORS_ORIGIN || '*', methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'] }));
 app.use(express.json());
 
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: '*', methods: ['GET', 'POST'] } });
 
+function env(...names) {
+  for (const name of names) {
+    if (process.env[name]) return process.env[name];
+  }
+  return undefined;
+}
+
+function escapeRegex(value) {
+  return String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function normalizeUsername(username) {
+  return String(username || '').trim().slice(0, 20);
+}
+
+function isValidUsername(username) {
+  return /^[\p{L}\p{N}_ -]{2,20}$/u.test(username);
+}
+
+function publicUser(user, includePrivate = false) {
+  if (!user) return null;
+  const out = { ...user, _id: user._id.toString() };
+  if (!includePrivate) {
+    delete out.googleId;
+    delete out.email;
+  }
+  return out;
+}
+
+function usernameQuery(username) {
+  const clean = normalizeUsername(username);
+  return {
+    $or: [
+      { username: clean },
+      { usernameLower: clean.toLowerCase() },
+      { username: { $regex: new RegExp('^' + escapeRegex(clean) + '$', 'i') } }
+    ]
+  };
+}
+
 // ─── MongoDB ──────────────────────────────────────────────────────────────────
 let db;
-const mongoUri = process.env.mongoDB;
+let mongoClient;
+const mongoUri = env('MONGODB_URI', 'MONGO_URI', 'MONGODB_URL', 'mongoDB');
+const mongoDbName = env('MONGODB_DB', 'MONGO_DB', 'DB_NAME') || 'unofunk';
 
 async function connectMongo() {
   if (!mongoUri) { console.warn('No MongoDB URI'); return; }
   try {
-    const client = new MongoClient(mongoUri);
-    await client.connect();
-    db = client.db('unofunk');
-    console.log('MongoDB connected');
+    mongoClient = new MongoClient(mongoUri, { serverSelectionTimeoutMS: 10000 });
+    await mongoClient.connect();
+    db = mongoClient.db(mongoDbName);
+    await db.collection('users').createIndex({ googleId: 1 }, { unique: true });
+    await db.collection('users').createIndex({ usernameLower: 1 }, { unique: true, sparse: true });
+    await db.collection('messages').createIndex({ from: 1, to: 1, date: 1 });
+    console.log(`MongoDB connected (${mongoDbName})`);
   } catch (e) { console.error('MongoDB error:', e.message); }
 }
 connectMongo();
@@ -30,14 +101,26 @@ function getCol(name) { return db ? db.collection(name) : null; }
 
 // ─── Firebase config route (public keys only) ────────────────────────────────
 app.get('/api/firebase-config', (req, res) => {
+  const config = {
+    apiKey: env('FIREBASE_API_KEY', 'apiKey'),
+    authDomain: env('FIREBASE_AUTH_DOMAIN', 'authDomain'),
+    projectId: env('FIREBASE_PROJECT_ID', 'projectId'),
+    storageBucket: env('FIREBASE_STORAGE_BUCKET', 'storageBucket'),
+    messagingSenderId: env('FIREBASE_MESSAGING_SENDER_ID', 'messagingSenderId'),
+    appId: env('FIREBASE_APP_ID', 'appId'),
+    measurementId: env('FIREBASE_MEASUREMENT_ID', 'measurementId')
+  };
+  const missing = ['apiKey', 'authDomain', 'projectId', 'appId'].filter(key => !config[key]);
+  if (missing.length) return res.status(500).json({ error: 'Firebase config missing', missing });
+  res.json(config);
+});
+
+app.get('/api/health', (req, res) => {
   res.json({
-    apiKey: process.env.apiKey,
-    authDomain: process.env.authDomain,
-    projectId: process.env.projectId,
-    storageBucket: process.env.storageBucket,
-    messagingSenderId: process.env.messagingSenderId,
-    appId: process.env.appId,
-    measurementId: process.env.measurementId
+    ok: true,
+    mongo: Boolean(db),
+    firebase: Boolean(env('FIREBASE_API_KEY', 'apiKey') && env('FIREBASE_PROJECT_ID', 'projectId')),
+    rooms: Object.keys(rooms).length
   });
 });
 
@@ -47,9 +130,14 @@ app.get('/api/firebase-config', (req, res) => {
 app.get('/api/users/check-username/:username', async (req, res) => {
   const col = getCol('users');
   if (!col) return res.json({ available: true });
-  const u = req.params.username.trim();
+  const u = normalizeUsername(req.params.username);
   if (!u || u.length < 2 || u.length > 20) return res.json({ available: false, reason: 'Pseudo invalide (2-20 caractères)' });
-  const existing = await col.findOne({ username: { $regex: new RegExp('^' + u + '$', 'i') } });
+  const existing = await col.findOne({
+    $or: [
+      { usernameLower: u.toLowerCase() },
+      { username: { $regex: new RegExp('^' + escapeRegex(u) + '$', 'i') } }
+    ]
+  });
   res.json({ available: !existing });
 });
 
@@ -65,27 +153,40 @@ app.post('/api/users/google-auth', async (req, res) => {
   if (user) {
     // Already registered, return user
     await col.updateOne({ googleId }, { $set: { lastLogin: new Date() } });
-    return res.json({ user: { ...user, _id: user._id.toString() } });
+    return res.json({ user: publicUser(user, true) });
   }
 
   // New user — username required
   if (!username) return res.json({ needsUsername: true });
+  const cleanUsername = normalizeUsername(username);
+  if (!isValidUsername(cleanUsername)) {
+    return res.status(400).json({ error: 'Invalid username' });
+  }
 
   // Check username unique
-  const taken = await col.findOne({ username: { $regex: new RegExp('^' + username + '$', 'i') } });
+  const usernameLower = cleanUsername.toLowerCase();
+  const taken = await col.findOne({
+    $or: [
+      { usernameLower },
+      { username: { $regex: new RegExp('^' + escapeRegex(cleanUsername) + '$', 'i') } }
+    ]
+  });
   if (taken) return res.json({ usernameTaken: true });
 
   // Verified user: ClmentCch gets a badge
-  const verified = username.toLowerCase() === 'clmentcch';
+  const verified = usernameLower === 'clmentcch';
 
   const newUser = {
     googleId, email, displayName, photoURL,
-    username,
+    username: cleanUsername,
+    usernameLower,
     verified,
     createdAt: new Date(),
     lastLogin: new Date(),
     friends: [],
     friendRequests: [],
+    followers: [],
+    following: [],
     recentGames: []
   };
   const result = await col.insertOne(newUser);
@@ -96,11 +197,12 @@ app.post('/api/users/google-auth', async (req, res) => {
 app.get('/api/users/profile/:username', async (req, res) => {
   const col = getCol('users');
   if (!col) return res.status(500).json({ error: 'DB unavailable' });
-  const user = await col.findOne({ username: req.params.username }, {
+  const username = normalizeUsername(req.params.username);
+  const user = await col.findOne(usernameQuery(username), {
     projection: { googleId: 0, email: 0 }
   });
   if (!user) return res.status(404).json({ error: 'User not found' });
-  res.json({ ...user, _id: user._id.toString() });
+  res.json(publicUser(user));
 });
 
 // Get user by googleId (for session restore)
@@ -109,7 +211,7 @@ app.get('/api/users/by-google/:googleId', async (req, res) => {
   if (!col) return res.status(500).json({ error: 'DB unavailable' });
   const user = await col.findOne({ googleId: req.params.googleId });
   if (!user) return res.status(404).json({ error: 'Not found' });
-  res.json({ ...user, _id: user._id.toString() });
+  res.json(publicUser(user, true));
 });
 
 // Save game result
@@ -132,12 +234,12 @@ app.post('/api/users/follow', async (req, res) => {
   const col = getCol('users');
   if (!col) return res.status(500).json({ error: 'DB unavailable' });
   const me = await col.findOne({ googleId });
-  const target = await col.findOne({ username: targetUsername });
+  const target = await col.findOne(usernameQuery(targetUsername));
   if (!me || !target) return res.status(404).json({ error: 'User not found' });
-  if ((me.following || []).includes(targetUsername))
+  if ((me.following || []).includes(target.username))
     return res.json({ ok: true, already: true });
-  await col.updateOne({ googleId }, { $addToSet: { following: targetUsername } });
-  await col.updateOne({ username: targetUsername }, { $addToSet: { followers: me.username } });
+  await col.updateOne({ googleId }, { $addToSet: { following: target.username } });
+  await col.updateOne({ username: target.username }, { $addToSet: { followers: me.username } });
   res.json({ ok: true });
 });
 
@@ -148,8 +250,10 @@ app.post('/api/users/unfollow', async (req, res) => {
   if (!col) return res.status(500).json({ error: 'DB unavailable' });
   const me = await col.findOne({ googleId });
   if (!me) return res.status(404).json({ error: 'User not found' });
-  await col.updateOne({ googleId }, { $pull: { following: targetUsername } });
-  await col.updateOne({ username: targetUsername }, { $pull: { followers: me.username } });
+  const target = await col.findOne(usernameQuery(targetUsername));
+  if (!target) return res.status(404).json({ error: 'User not found' });
+  await col.updateOne({ googleId }, { $pull: { following: target.username } });
+  await col.updateOne({ username: target.username }, { $pull: { followers: me.username } });
   res.json({ ok: true });
 });
 
@@ -161,11 +265,12 @@ app.post('/api/friends/request', async (req, res) => {
   const col = getCol('users');
   if (!col) return res.status(500).json({ error: 'DB unavailable' });
   const me = await col.findOne({ googleId });
-  const target = await col.findOne({ username: targetUsername });
+  const target = await col.findOne(usernameQuery(targetUsername));
   if (!me || !target) return res.status(404).json({ error: 'User not found' });
-  if ((me.friends || []).includes(targetUsername)) return res.json({ ok: true, alreadyFriends: true });
+  if ((me.friends || []).includes(target.username)) return res.json({ ok: true, alreadyFriends: true });
+  if ((target.friendRequests || []).some(req => req.from === me.username)) return res.json({ ok: true, alreadyRequested: true });
   const reqObj = { from: me.username, fromId: googleId, date: new Date() };
-  await col.updateOne({ username: targetUsername }, { $addToSet: { friendRequests: reqObj } });
+  await col.updateOne({ username: target.username }, { $addToSet: { friendRequests: reqObj } });
   res.json({ ok: true });
 });
 
@@ -176,11 +281,13 @@ app.post('/api/friends/accept', async (req, res) => {
   if (!col) return res.status(500).json({ error: 'DB unavailable' });
   const me = await col.findOne({ googleId });
   if (!me) return res.status(404).json({ error: 'User not found' });
+  const fromUser = await col.findOne(usernameQuery(fromUsername));
+  if (!fromUser) return res.status(404).json({ error: 'User not found' });
   await col.updateOne({ googleId }, {
-    $addToSet: { friends: fromUsername },
-    $pull: { friendRequests: { from: fromUsername } }
+    $addToSet: { friends: fromUser.username },
+    $pull: { friendRequests: { from: fromUser.username } }
   });
-  await col.updateOne({ username: fromUsername }, { $addToSet: { friends: me.username } });
+  await col.updateOne({ username: fromUser.username }, { $addToSet: { friends: me.username } });
   res.json({ ok: true });
 });
 
@@ -205,7 +312,7 @@ app.get('/api/friends/:googleId', async (req, res) => {
   const profiles = friends.length > 0
     ? await col.find({ username: { $in: friends } }, { projection: { googleId: 0, email: 0 } }).toArray()
     : [];
-  res.json({ friends: profiles.map(p => ({ ...p, _id: p._id.toString() })), requests });
+  res.json({ friends: profiles.map(p => publicUser(p)), requests });
 });
 
 // ─── MESSAGE ROUTES ───────────────────────────────────────────────────────────
@@ -219,11 +326,13 @@ app.post('/api/messages/send', async (req, res) => {
   if (!usersCol || !msgCol) return res.status(500).json({ error: 'DB unavailable' });
   const me = await usersCol.findOne({ googleId });
   if (!me) return res.status(404).json({ error: 'User not found' });
+  const target = await usersCol.findOne(usernameQuery(toUsername));
+  if (!target) return res.status(404).json({ error: 'User not found' });
   // Check they are friends
-  if (!(me.friends || []).includes(toUsername)) return res.status(403).json({ error: 'Pas amis' });
+  if (!(me.friends || []).includes(target.username)) return res.status(403).json({ error: 'Pas amis' });
   const msg = {
     from: me.username,
-    to: toUsername,
+    to: target.username,
     content: content.trim().slice(0, 500),
     date: new Date(),
     read: false
@@ -239,7 +348,9 @@ app.get('/api/messages/:googleId/:withUsername', async (req, res) => {
   if (!usersCol || !msgCol) return res.status(500).json({ error: 'DB unavailable' });
   const me = await usersCol.findOne({ googleId: req.params.googleId });
   if (!me) return res.status(404).json({ error: 'Not found' });
-  const other = req.params.withUsername;
+  const otherUser = await usersCol.findOne(usernameQuery(req.params.withUsername));
+  if (!otherUser) return res.status(404).json({ error: 'User not found' });
+  const other = otherUser.username;
   const msgs = await msgCol.find({
     $or: [
       { from: me.username, to: other },
@@ -556,7 +667,20 @@ io.on('connection', socket => {
   });
 });
 
-app.get('/', (req, res) => res.send('UNO 3D backend running'));
+app.get('/', (req, res) => res.json({ ok: true, service: 'UNO 3D backend' }));
+
+app.use((err, req, res, next) => {
+  console.error('Request error:', err);
+  if (res.headersSent) return next(err);
+  res.status(500).json({ error: 'Internal server error' });
+});
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => console.log(`UNO server running on port ${PORT}`));
+
+process.on('SIGTERM', async () => {
+  server.close(async () => {
+    if (mongoClient) await mongoClient.close();
+    process.exit(0);
+  });
+});
