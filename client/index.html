@@ -312,7 +312,7 @@ button:active{transform:scale(.96)!important}
 <!-- Firebase SDK -->
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, onAuthStateChanged, signOut, setPersistence, browserLocalPersistence } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 
 const API = 'https://uno-3d-backend.onrender.com';
 const FIREBASE_CONFIG = {
@@ -346,11 +346,14 @@ async function loadFirebase() {
   try {
     const app = initializeApp(FIREBASE_CONFIG);
     const auth = getAuth(app);
+    await setPersistence(auth, browserLocalPersistence);
     window._auth = auth;
     window._provider = new GoogleAuthProvider();
     window._provider.setCustomParameters({ prompt: 'select_account' });
     onAuthStateChanged(auth, handleAuthChange);
-    getRedirectResult(auth).catch(e => {
+    getRedirectResult(auth).then(result => {
+      if (result?.user) handleAuthChange(result.user);
+    }).catch(e => {
       console.error('Firebase redirect failed:', e);
       showNotif(authErrorMessage(e), '#e8304a');
     });
@@ -373,6 +376,7 @@ async function handleAuthChange(firebaseUser) {
     updateMenuForUser(user);
     refreshBadges();
   } catch(e) {
+    console.warn('User profile sync needed:', e);
     window._pendingFirebaseUser = firebaseUser;
     showUsernameModal();
   }
@@ -381,7 +385,8 @@ async function handleAuthChange(firebaseUser) {
 window.signInGoogle = async function() {
   if (!window._auth) return showNotif('Firebase non charge', '#e8304a');
   try {
-    await signInWithPopup(window._auth, window._provider);
+    const result = await signInWithPopup(window._auth, window._provider);
+    if (result?.user) await handleAuthChange(result.user);
   } catch(e) {
     console.error('Google sign-in failed:', e);
     if (e.code === 'auth/popup-blocked') {
