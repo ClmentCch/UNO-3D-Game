@@ -312,7 +312,7 @@ button:active{transform:scale(.96)!important}
 <!-- Firebase SDK -->
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, onAuthStateChanged, signOut, setPersistence, browserLocalPersistence } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+import { getAuth, GoogleAuthProvider, signInWithPopup, getRedirectResult, onAuthStateChanged, signOut, setPersistence, browserLocalPersistence } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 
 const API = 'https://uno-3d-backend.onrender.com';
 const FIREBASE_CONFIG = {
@@ -324,11 +324,12 @@ const FIREBASE_CONFIG = {
   appId: '1:798019294102:web:0048036e7912bc8d8c43b7',
   measurementId: 'G-R2FVYLC69M'
 };
+let authBooting = true;
 
 function authErrorMessage(error) {
   const code = error?.code || '';
   if (code === 'auth/unauthorized-domain') return 'Domaine Vercel non autorise dans Firebase';
-  if (code === 'auth/popup-blocked') return 'Popup bloquee, redirection Google...';
+  if (code === 'auth/popup-blocked') return 'Popup bloquee';
   if (code === 'auth/popup-closed-by-user') return 'Connexion annulee';
   if (code === 'auth/network-request-failed') return 'Erreur reseau Firebase';
   return 'Erreur de connexion: ' + (code || 'inconnue');
@@ -350,15 +351,20 @@ async function loadFirebase() {
     window._auth = auth;
     window._provider = new GoogleAuthProvider();
     window._provider.setCustomParameters({ prompt: 'select_account' });
-    onAuthStateChanged(auth, handleAuthChange);
-    getRedirectResult(auth).then(result => {
-      if (result?.user) handleAuthChange(result.user);
-    }).catch(e => {
+
+    const redirectResult = await getRedirectResult(auth).catch(e => {
       console.error('Firebase redirect failed:', e);
       showNotif(authErrorMessage(e), '#e8304a');
+      return null;
     });
+    if (redirectResult?.user) await handleAuthChange(redirectResult.user);
+
+    onAuthStateChanged(auth, user => handleAuthChange(user));
+    authBooting = false;
+    if (auth.currentUser) await handleAuthChange(auth.currentUser);
   } catch(e) {
     console.error('Firebase init failed:', e);
+    authBooting = false;
     showNotif('Firebase non initialise', '#e8304a');
   }
 }
@@ -366,6 +372,10 @@ loadFirebase();
 
 async function handleAuthChange(firebaseUser) {
   if (!firebaseUser) {
+    if (authBooting) return;
+    await new Promise(resolve => setTimeout(resolve, 500));
+    const restoredUser = window._auth?.currentUser;
+    if (restoredUser) return handleAuthChange(restoredUser);
     window._currentUser = null;
     updateMenuForAnon();
     return;
@@ -389,11 +399,7 @@ window.signInGoogle = async function() {
     if (result?.user) await handleAuthChange(result.user);
   } catch(e) {
     console.error('Google sign-in failed:', e);
-    if (e.code === 'auth/popup-blocked') {
-      showNotif(authErrorMessage(e), '#f5c800');
-      await signInWithRedirect(window._auth, window._provider);
-      return;
-    }
+    if (e.code === 'auth/popup-blocked') return showNotif('Autorise les popups pour Google', '#f5c800');
     if (e.code !== 'auth/popup-closed-by-user') showNotif(authErrorMessage(e), '#e8304a');
   }
 };
