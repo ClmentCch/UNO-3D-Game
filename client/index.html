@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<title>UNO 3D Online</title>
+<style>
+:root{
+  --red:#e8304a;--yellow:#f5c800;--blue:#2473cc;--green:#2ec05e;
+  --dark:#0a0a18;--dark2:#13132a;--dark3:#1e1e3a;--gold:#f5c800;
+  --radius:clamp(12px,2vw,20px);
+  --card-w:clamp(60px,10vw,100px);--card-h:clamp(90px,15vw,150px);
+  --card-radius:clamp(10px,1.5vw,16px);
+  --font:clamp(12px,1.8vw,16px);--btn-pad:clamp(10px,2vw,16px) clamp(18px,3vw,28px);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',Arial,sans-serif;background:var(--dark);color:#fff;overflow:hidden;height:100dvh;width:100dvw}
+.bg-stars{position:fixed;inset:0;z-index:0;background:radial-gradient(ellipse 80% 60% at 50% -10%,#1a0a3a 0%,transparent 60%),radial-gradient(ellipse 60% 40% at 80% 100%,#0a1a3a 0%,transparent 50%),var(--dark)}
+.bg-stars::before{content:'';position:absolute;inset:0;background-image:radial-gradient(1px 1px at 20% 30%,rgba(255,255,255,.6) 0%,transparent 100%),radial-gradient(1px 1px at 60% 20%,rgba(255,255,255,.4) 0%,transparent 100%),radial-gradient(1.5px 1.5px at 80% 60%,rgba(255,255,255,.5) 0%,transparent 100%),radial-gradient(1px 1px at 10% 70%,rgba(255,255,255,.3) 0%,transparent 100%),radial-gradient(1px 1px at 50% 80%,rgba(255,255,255,.4) 0%,transparent 100%),radial-gradient(1px 1px at 90% 40%,rgba(255,255,255,.5) 0%,transparent 100%);animation:twinkle 4s ease-in-out infinite alternate}
+@keyframes twinkle{0%{opacity:.6}100%{opacity:1}}
+.screen{position:absolute;inset:0;z-index:10;display:flex;justify-content:center;align-items:center;flex-direction:column;transition:opacity .4s,transform .4s}
+.screen.hidden{opacity:0;pointer-events:none;transform:scale(.95)}
+.logo{font-size:clamp(60px,12vw,110px);font-weight:900;letter-spacing:-2px;text-shadow:0 0 20px rgba(245,200,0,.6),0 4px 0 #b08800,0 8px 0 #7a5e00,0 12px 20px rgba(0,0,0,.8);background:linear-gradient(180deg,#fff9e0 0%,#f5c800 40%,#e0a800 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:logoFloat 3s ease-in-out infinite;margin-bottom:10px}
+@keyframes logoFloat{0%,100%{transform:translateY(0) rotateX(0)}50%{transform:translateY(-8px) rotateX(5deg)}}
+.card-box{background:rgba(255,255,255,.06);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.12);padding:clamp(20px,4vw,36px);border-radius:var(--radius);width:clamp(280px,85vw,400px);display:flex;flex-direction:column;gap:clamp(10px,2vw,14px);box-shadow:0 20px 60px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.05) inset}
+input{padding:var(--btn-pad);border:1.5px solid rgba(255,255,255,.2);border-radius:12px;background:rgba(255,255,255,.08);color:#fff;font-size:var(--font);transition:border-color .2s,background .2s;outline:none}
+input:focus{border-color:var(--gold);background:rgba(255,255,255,.12)}
+input::placeholder{color:rgba(255,255,255,.4)}
+button{padding:var(--btn-pad);border:none;border-radius:12px;font-size:var(--font);font-weight:700;cursor:pointer;transition:transform .15s,box-shadow .15s;letter-spacing:.5px;position:relative;overflow:hidden}
+button::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.15) 0%,transparent 100%);pointer-events:none}
+button:active{transform:scale(.96)!important}
+.btn-red{background:linear-gradient(160deg,#ff4d6a,var(--red));color:#fff;box-shadow:0 6px 20px rgba(232,48,74,.45),0 2px 0 #a01828}
+.btn-red:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(232,48,74,.55)}
+.btn-blue{background:linear-gradient(160deg,#3a8de8,var(--blue));color:#fff;box-shadow:0 6px 20px rgba(36,115,204,.45),0 2px 0 #0e3a7a}
+.btn-blue:hover{transform:translateY(-2px)}
+.btn-green{background:linear-gradient(160deg,#45d975,var(--green));color:#fff;box-shadow:0 6px 20px rgba(46,192,94,.45),0 2px 0 #0e6628}
+.btn-green:hover{transform:translateY(-2px)}
+.btn-ghost{background:rgba(255,255,255,.08);color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.15)}
+.btn-ghost:hover{background:rgba(255,255,255,.14);transform:translateY(-1px)}
+.btn-google{background:#fff;color:#333;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 4px 15px rgba(0,0,0,.3)}
+.btn-google:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,0,0,.4)}
+.btn-google svg{flex-shrink:0}
+.google-connected{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.9);font-size:clamp(11px,1.6vw,13px);font-weight:600;display:flex;align-items:center;gap:8px;cursor:default;justify-content:center}
+.google-connected img{width:22px;height:22px;border-radius:50%}
+#roomCode{color:var(--gold);font-size:clamp(28px,6vw,42px);font-weight:900;text-align:center;letter-spacing:8px;text-shadow:0 0 20px rgba(245,200,0,.5);padding:10px;background:rgba(245,200,0,.08);border-radius:10px;border:1px solid rgba(245,200,0,.2)}
+/* GAME UI */
+#gameUI{position:absolute;inset:0;z-index:5;display:flex;flex-direction:column;transition:opacity .4s}
+#gameUI.hidden{opacity:0;pointer-events:none}
+#topBar{position:relative;z-index:10;padding:clamp(8px,2vw,14px) clamp(10px,3vw,20px);display:flex;justify-content:space-between;align-items:center;gap:10px;background:rgba(0,0,0,.35);backdrop-filter:blur(10px);border-bottom:1px solid rgba(255,255,255,.07)}
+#players{display:flex;gap:8px;flex-wrap:wrap;flex:1}
+.player{background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.1);padding:6px 12px;border-radius:20px;font-size:clamp(11px,1.6vw,14px);font-weight:600;display:flex;align-items:center;gap:6px;transition:all .3s}
+.player .dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.3)}
+.player.active{border-color:var(--gold);background:rgba(245,200,0,.15);box-shadow:0 0 12px rgba(245,200,0,.3);animation:pulsePlayer .8s ease-in-out infinite alternate}
+.player.active .dot{background:var(--gold)}
+@keyframes pulsePlayer{0%{box-shadow:0 0 8px rgba(245,200,0,.3)}100%{box-shadow:0 0 20px rgba(245,200,0,.5)}}
+#drawBtn{white-space:nowrap;flex-shrink:0;background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.2);padding:8px 16px;border-radius:20px;font-size:clamp(11px,1.6vw,14px);font-weight:700;cursor:pointer;transition:all .2s}
+#drawBtn:hover{background:rgba(255,255,255,.2);transform:scale(1.05)}
+#statusBar{position:absolute;top:clamp(60px,12vw,80px);left:50%;transform:translateX(-50%);z-index:20;pointer-events:none}
+#status{font-size:clamp(13px,2vw,18px);font-weight:800;letter-spacing:1px;padding:6px 20px;border-radius:20px;background:rgba(0,0,0,.5);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.1);transition:all .3s;white-space:nowrap}
+#status.my-turn{background:rgba(245,200,0,.25);border-color:rgba(245,200,0,.5);color:var(--gold);animation:statusPulse 1s ease-in-out infinite alternate}
+@keyframes statusPulse{0%{box-shadow:0 0 10px rgba(245,200,0,.3)}100%{box-shadow:0 0 25px rgba(245,200,0,.5)}}
+#table{flex:1;position:relative;display:flex;justify-content:center;align-items:center}
+.felt{width:clamp(160px,28vw,320px);height:clamp(160px,28vw,320px);border-radius:50%;background:radial-gradient(circle at 40% 35%,#1e6b3f,#0d3d22);border:3px solid rgba(255,255,255,.08);box-shadow:0 0 0 8px rgba(0,0,0,.3),0 0 0 10px rgba(139,90,40,.3),0 30px 80px rgba(0,0,0,.6),inset 0 2px 4px rgba(255,255,255,.1);display:flex;justify-content:center;align-items:center;position:relative}
+.felt::before{content:'';position:absolute;inset:10px;border-radius:50%;border:1px dashed rgba(255,255,255,.08)}
+#topCard{width:var(--card-w);height:var(--card-h);border-radius:var(--card-radius);display:flex;justify-content:center;align-items:center;font-size:clamp(22px,4vw,38px);font-weight:900;box-shadow:0 4px 0 rgba(0,0,0,.4),0 8px 20px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.3);border:2px solid rgba(255,255,255,.25);position:relative;overflow:hidden;animation:cardFloat 3s ease-in-out infinite}
+@keyframes cardFloat{0%,100%{transform:translateY(0) rotateZ(-2deg)}50%{transform:translateY(-6px) rotateZ(2deg)}}
+#topCard::before{content:'';position:absolute;top:5px;left:5px;right:5px;bottom:5px;border-radius:calc(var(--card-radius) - 4px);border:1.5px solid rgba(255,255,255,.2)}
+#topCard::after{content:'';position:absolute;top:0;left:0;right:0;height:40%;background:linear-gradient(180deg,rgba(255,255,255,.2),transparent);border-radius:var(--card-radius) var(--card-radius) 0 0;pointer-events:none}
+@keyframes flipCard{0%{transform:rotateY(0) translateY(0)}50%{transform:rotateY(90deg) translateY(-20px) scale(1.1)}100%{transform:rotateY(0) translateY(0)}}
+.flip-anim{animation:flipCard .5s ease forwards!important}
+#hand{padding:clamp(8px,2vw,16px) 10px clamp(12px,3vw,20px);display:flex;justify-content:center;align-items:flex-end;flex-wrap:nowrap;overflow-x:auto;overflow-y:visible;min-height:clamp(110px,20vw,180px);gap:0;scrollbar-width:none;background:linear-gradient(0deg,rgba(0,0,0,.45) 0%,transparent 100%);position:relative;z-index:15}
+#hand::-webkit-scrollbar{display:none}
+.card{width:var(--card-w);height:var(--card-h);border-radius:var(--card-radius);display:flex;justify-content:center;align-items:center;font-size:clamp(18px,3.5vw,32px);font-weight:900;cursor:pointer;flex-shrink:0;margin:0 clamp(-18px,-4vw,-8px);position:relative;border:2px solid rgba(255,255,255,.3);transition:transform .2s cubic-bezier(.34,1.56,.64,1),margin .2s;box-shadow:2px 4px 8px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.35);z-index:1}
+.card::before{content:'';position:absolute;inset:4px;border-radius:calc(var(--card-radius) - 4px);border:1.5px solid rgba(255,255,255,.2);pointer-events:none}
+.card::after{content:'';position:absolute;top:0;left:0;right:0;height:45%;background:linear-gradient(180deg,rgba(255,255,255,.25),transparent);border-radius:var(--card-radius) var(--card-radius) 0 0;pointer-events:none}
+.card:hover{transform:translateY(clamp(-18px,-5vw,-30px)) scale(1.08) rotateX(5deg)!important;z-index:100!important;margin:0 clamp(-10px,-2vw,0px)!important;box-shadow:0 20px 40px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.4)}
+.card-val{position:absolute;top:5px;left:7px;font-size:clamp(10px,1.8vw,14px);font-weight:900;line-height:1}
+.card-val-bot{position:absolute;bottom:5px;right:7px;font-size:clamp(10px,1.8vw,14px);font-weight:900;line-height:1;transform:rotate(180deg)}
+.c-red{background:linear-gradient(145deg,#ff4d6a,var(--red));color:#fff}
+.c-yellow{background:linear-gradient(145deg,#ffe040,var(--yellow));color:#222}
+.c-green{background:linear-gradient(145deg,#45d975,var(--green));color:#fff}
+.c-blue{background:linear-gradient(145deg,#3a8de8,var(--blue));color:#fff}
+.c-wild{background:conic-gradient(from 0deg at 50% 50%,#e8304a 0deg 90deg,#f5c800 90deg 180deg,#2ec05e 180deg 270deg,#2473cc 270deg 360deg);color:#fff;text-shadow:0 0 6px rgba(0,0,0,.8)}
+@keyframes drawAnim{0%{transform:scale(0) translateY(-50px) rotateZ(-20deg);opacity:0}80%{transform:scale(1.1) translateY(5px) rotateZ(2deg);opacity:1}100%{transform:scale(1) translateY(0) rotateZ(0);opacity:1}}
+.drawn{animation:drawAnim .4s cubic-bezier(.34,1.56,.64,1) forwards}
+#unoBadge{position:absolute;font-size:clamp(28px,5vw,50px);font-weight:900;color:var(--gold);letter-spacing:2px;text-shadow:0 0 30px rgba(245,200,0,.8),0 4px 0 #a07000;animation:unoPop .6s cubic-bezier(.34,1.56,.64,1);pointer-events:none;z-index:100;display:none}
+@keyframes unoPop{0%{transform:scale(0) rotate(-20deg);opacity:0}60%{transform:scale(1.3) rotate(5deg);opacity:1}100%{transform:scale(1) rotate(0);opacity:1}}
+#colorPicker{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);display:flex;justify-content:center;align-items:center;flex-direction:column;gap:20px;opacity:0;pointer-events:none;transition:opacity .3s}
+#colorPicker.show{opacity:1;pointer-events:all}
+#colorPicker h3{font-size:clamp(16px,3vw,24px);font-weight:700}
+.color-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:clamp(200px,50vw,280px)}
+.color-btn{height:clamp(55px,10vw,80px);border-radius:16px;border:3px solid rgba(255,255,255,.3);font-size:clamp(14px,2.5vw,20px);font-weight:800;cursor:pointer;transition:transform .15s;box-shadow:0 6px 20px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.3)}
+.color-btn:hover{transform:scale(1.06)}
+#winnerOverlay{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.8);backdrop-filter:blur(10px);display:flex;flex-direction:column;justify-content:center;align-items:center;gap:20px;opacity:0;pointer-events:none;transition:opacity .5s}
+#winnerOverlay.show{opacity:1;pointer-events:all}
+.winner-text{font-size:clamp(28px,6vw,60px);font-weight:900;color:var(--gold);text-align:center;text-shadow:0 0 40px rgba(245,200,0,.6);animation:winnerBounce .6s cubic-bezier(.34,1.56,.64,1)}
+@keyframes winnerBounce{0%{transform:scale(0);opacity:0}60%{transform:scale(1.2)}100%{transform:scale(1);opacity:1}}
+.confetti{position:fixed;pointer-events:none;font-size:24px;animation:confettiDrop linear forwards}
+@keyframes confettiDrop{0%{transform:translateY(-20px) rotate(0);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}
+#notif{position:fixed;top:80px;left:50%;transform:translateX(-50%) translateY(-20px);background:rgba(20,20,40,.9);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:10px 24px;font-size:clamp(12px,2vw,16px);font-weight:600;opacity:0;transition:all .3s;z-index:250;white-space:nowrap;pointer-events:none}
+#notif.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#deckArea{position:absolute;right:clamp(10px,4vw,40px);display:flex;flex-direction:column;align-items:center;gap:6px}
+.deck-stack{width:var(--card-w);height:var(--card-h);border-radius:var(--card-radius);background:linear-gradient(145deg,#1a1a3a,#0d0d22);border:2px solid rgba(255,255,255,.15);cursor:pointer;display:flex;justify-content:center;align-items:center;box-shadow:3px 3px 0 rgba(0,0,0,.4),6px 6px 0 rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.2);position:relative;overflow:hidden;transition:transform .15s}
+.deck-stack:hover{transform:translateY(-3px) scale(1.02)}
+.deck-stack::after{content:'UNO';font-size:clamp(14px,2.5vw,22px);font-weight:900;color:var(--gold);text-shadow:0 0 10px rgba(245,200,0,.5);letter-spacing:2px}
+.deck-count{font-size:clamp(10px,1.6vw,13px);color:rgba(255,255,255,.5);font-weight:600}
+.opp-hand{position:absolute;display:flex;pointer-events:none}
+.opp-card{width:clamp(30px,5vw,50px);height:clamp(45px,7.5vw,75px);border-radius:8px;background:linear-gradient(145deg,#1e1e3a,#0d0d22);border:1.5px solid rgba(255,255,255,.15);box-shadow:2px 2px 4px rgba(0,0,0,.4);position:relative;overflow:hidden;margin:0 -8px}
+.opp-card::after{content:'';position:absolute;top:0;left:0;right:0;height:40%;background:linear-gradient(rgba(255,255,255,.1),transparent)}
+#opp-top{top:clamp(50px,10vw,75px);left:50%;transform:translateX(-50%);flex-direction:row}
+#opp-left{left:clamp(5px,2vw,20px);top:50%;transform:translateY(-50%);flex-direction:column}
+#opp-left .opp-card{margin:-10px 0;transform:rotate(-90deg)}
+#opp-right{right:clamp(5px,2vw,20px);top:50%;transform:translateY(-50%);flex-direction:column}
+#opp-right .opp-card{margin:-10px 0;transform:rotate(90deg)}
+
+/* ── OVERLAY PANELS ── */
+.overlay-panel{position:fixed;inset:0;z-index:150;background:rgba(0,0,0,.75);backdrop-filter:blur(12px);display:flex;justify-content:center;align-items:flex-start;padding:20px;overflow-y:auto;opacity:0;pointer-events:none;transition:opacity .3s}
+.overlay-panel.show{opacity:1;pointer-events:all}
+.panel-box{background:rgba(20,20,45,.95);border:1px solid rgba(255,255,255,.12);border-radius:20px;width:clamp(300px,90vw,520px);padding:clamp(16px,3vw,28px);display:flex;flex-direction:column;gap:14px;margin:auto}
+.panel-header{display:flex;align-items:center;justify-content:space-between;padding-bottom:12px;border-bottom:1px solid rgba(255,255,255,.08)}
+.panel-title{font-size:clamp(16px,2.5vw,22px);font-weight:800;color:#fff}
+.close-btn{background:rgba(255,255,255,.1);border:none;color:#fff;width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;transition:background .2s;flex-shrink:0}
+.close-btn:hover{background:rgba(255,255,255,.2)}
+
+/* Profile */
+.profile-avatar{width:clamp(60px,10vw,90px);height:clamp(60px,10vw,90px);border-radius:50%;object-fit:cover;border:3px solid var(--gold);box-shadow:0 0 20px rgba(245,200,0,.3)}
+.profile-avatar-default{width:clamp(60px,10vw,90px);height:clamp(60px,10vw,90px);border-radius:50%;background:linear-gradient(145deg,#2473cc,#1a1a4a);border:3px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:clamp(24px,4vw,36px);font-weight:900;color:var(--gold)}
+.verified-badge{display:inline-flex;align-items:center;gap:4px;background:rgba(36,115,204,.2);border:1px solid rgba(36,115,204,.4);color:#60a0f0;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px}
+.game-item{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.game-item .result-win{color:#2ec05e;font-weight:800}
+.game-item .result-lose{color:#e8304a;font-weight:800}
+.game-date{font-size:11px;color:rgba(255,255,255,.4)}
+
+/* Friends */
+.friend-item{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:10px 14px;display:flex;align-items:center;gap:12px}
+.friend-avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(145deg,#2473cc,#1a1a4a);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;color:#fff;flex-shrink:0}
+.friend-name{font-weight:700;font-size:clamp(13px,2vw,15px)}
+.friend-actions{margin-left:auto;display:flex;gap:6px}
+.mini-btn{padding:5px 12px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;border:none;transition:transform .15s,opacity .15s}
+.mini-btn:hover{transform:scale(1.05)}
+.unread-badge{background:var(--red);color:#fff;border-radius:50%;width:18px;height:18px;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+
+/* Messages */
+.msg-list{display:flex;flex-direction:column;gap:8px;max-height:300px;overflow-y:auto;padding:4px;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.2) transparent}
+.msg-bubble{max-width:75%;padding:8px 14px;border-radius:16px;font-size:clamp(12px,1.8vw,14px);line-height:1.5;word-break:break-word}
+.msg-me{align-self:flex-end;background:linear-gradient(135deg,#2473cc,#1a5aaa);border-bottom-right-radius:4px}
+.msg-them{align-self:flex-start;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.1);border-bottom-left-radius:4px}
+.msg-time{font-size:10px;color:rgba(255,255,255,.4);margin-top:2px;text-align:right}
+.msg-input-row{display:flex;gap:8px}
+.msg-input-row input{flex:1;padding:10px 14px;font-size:14px}
+.msg-send-btn{padding:10px 16px;border-radius:10px;background:linear-gradient(160deg,#3a8de8,var(--blue));color:#fff;border:none;font-weight:700;cursor:pointer;transition:transform .15s}
+.msg-send-btn:hover{transform:scale(1.05)}
+
+/* Request item */
+.req-item{background:rgba(245,200,0,.06);border:1px solid rgba(245,200,0,.15);border-radius:12px;padding:10px 14px;display:flex;align-items:center;gap:10px}
+
+/* Nav buttons in menu */
+.menu-nav{display:flex;gap:8px;width:clamp(280px,85vw,400px);justify-content:center;flex-wrap:wrap;margin-top:4px}
+.nav-btn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.8);border-radius:20px;padding:7px 16px;font-size:clamp(11px,1.6vw,13px);font-weight:700;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:5px}
+.nav-btn:hover{background:rgba(255,255,255,.15);transform:translateY(-1px)}
+.nav-badge{background:var(--red);color:#fff;border-radius:50%;width:16px;height:16px;font-size:9px;font-weight:800;display:inline-flex;align-items:center;justify-content:center}
+
+/* Username modal */
+#usernameModal{position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.85);backdrop-filter:blur(15px);display:flex;justify-content:center;align-items:center;opacity:0;pointer-events:none;transition:opacity .3s}
+#usernameModal.show{opacity:1;pointer-events:all}
+.username-box{background:rgba(20,20,45,.98);border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:32px;width:clamp(300px,85vw,400px);display:flex;flex-direction:column;gap:16px;align-items:center;text-align:center}
+.username-box h2{font-size:clamp(18px,3vw,26px);font-weight:900;color:var(--gold)}
+.username-box p{color:rgba(255,255,255,.6);font-size:clamp(12px,1.8vw,14px)}
+.username-error{color:#e8304a;font-size:13px;font-weight:600;min-height:18px}
+
+@media(max-width:600px){#opp-top{top:52px}.opp-card{margin:0 -6px}#opp-left .opp-card,#opp-right .opp-card{margin:-8px 0}}
+@media(min-width:601px) and (max-width:1024px){:root{--card-w:80px;--card-h:120px}}
+</style>
+</head>
+<body>
+<div class="bg-stars"></div>
+
+<!-- USERNAME MODAL -->
+<div id="usernameModal">
+  <div class="username-box">
+    <div style="font-size:48px">🎮</div>
+    <h2>Choisis ton pseudo</h2>
+    <p>Il sera lié à ton compte Google pour toujours.</p>
+    <input id="usernameInput" placeholder="Pseudo (2-20 caractères)" maxlength="20" style="width:100%;text-align:center;font-size:18px;font-weight:700;letter-spacing:1px"/>
+    <div class="username-error" id="usernameError"></div>
+    <button class="btn-green" style="width:100%" onclick="submitUsername()">✅ Valider</button>
+  </div>
+</div>
+
+<!-- MENU -->
+<div id="menuScreen" class="screen">
+  <div class="logo">UNO</div>
+  <p style="color:rgba(255,255,255,.5);font-size:clamp(12px,2vw,15px);margin-bottom:12px;letter-spacing:2px">ÉDITION 3D</p>
+  <div class="card-box">
+    <div id="googleAuthBtn">
+      <button class="btn-google" onclick="signInGoogle()" style="width:100%">
+        <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.08 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.35-8.16 2.35-6.26 0-11.57-3.59-13.46-8.76l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+        Se connecter avec Google
+      </button>
+    </div>
+    <div id="nameRow" style="display:flex;gap:8px;align-items:center">
+      <input id="nameInput" placeholder="Pseudo (anonyme par défaut)" maxlength="20" style="flex:1"/>
+    </div>
+    <button class="btn-red" onclick="startSolo()">🎮 Jouer contre les bots</button>
+    <button class="btn-blue" onclick="showCreate()">🏠 Créer une salle</button>
+    <button class="btn-green" onclick="showJoin()">🔗 Rejoindre une salle</button>
+  </div>
+  <div class="menu-nav">
+    <button class="nav-btn" onclick="openFriends()">👥 Mes amis <span id="friendReqBadge" class="nav-badge" style="display:none">!</span></button>
+    <button class="nav-btn" onclick="openMessages()">💬 Messages <span id="msgBadge" class="nav-badge" style="display:none">!</span></button>
+    <button class="nav-btn" id="profileNavBtn" onclick="openOwnProfile()" style="display:none">👤 Mon profil</button>
+  </div>
+</div>
+
+<!-- CREATE -->
+<div id="createScreen" class="screen hidden">
+  <div class="logo" style="font-size:clamp(40px,8vw,70px);margin-bottom:20px">SALLE</div>
+  <div class="card-box">
+    <p style="text-align:center;color:rgba(255,255,255,.5);font-size:13px">Partage ce code :</p>
+    <div id="roomCode">----</div>
+    <p style="text-align:center;color:rgba(255,255,255,.4);font-size:12px">En attente de joueurs...</p>
+    <button class="btn-green" onclick="startOnlineGame()">🚀 Démarrer la partie</button>
+    <button class="btn-ghost" onclick="backMenu()">← Retour</button>
+  </div>
+</div>
+
+<!-- JOIN -->
+<div id="joinScreen" class="screen hidden">
+  <div class="logo" style="font-size:clamp(40px,8vw,70px);margin-bottom:20px">JOIN</div>
+  <div class="card-box">
+    <input id="joinCode" placeholder="Code de la salle" maxlength="4" style="text-align:center;font-size:clamp(20px,4vw,30px);font-weight:700;letter-spacing:8px"/>
+    <button class="btn-green" onclick="joinRoom()">✅ Rejoindre</button>
+    <button class="btn-ghost" onclick="backMenu()">← Retour</button>
+  </div>
+</div>
+
+<!-- GAME UI -->
+<div id="gameUI" class="hidden">
+  <div id="topBar">
+    <div id="players"></div>
+    <button id="drawBtn" onclick="drawCard()">+2 Piocher</button>
+  </div>
+  <div id="statusBar"><div id="status">En attente...</div></div>
+  <div id="table">
+    <div class="felt"><div id="topCard"></div></div>
+    <div id="opp-top" class="opp-hand"></div>
+    <div id="opp-left" class="opp-hand"></div>
+    <div id="opp-right" class="opp-hand"></div>
+    <div id="deckArea">
+      <div class="deck-stack" onclick="drawCard()"></div>
+      <span class="deck-count" id="deckCount"></span>
+    </div>
+  </div>
+  <div id="hand"></div>
+  <div id="unoBadge">UNO!</div>
+</div>
+
+<!-- COLOR PICKER -->
+<div id="colorPicker">
+  <h3>🎨 Choisir une couleur</h3>
+  <div class="color-grid">
+    <button class="color-btn c-red" onclick="pickColor('red')">🔴 Rouge</button>
+    <button class="color-btn c-blue" onclick="pickColor('blue')">🔵 Bleu</button>
+    <button class="color-btn c-green" onclick="pickColor('green')">🟢 Vert</button>
+    <button class="color-btn c-yellow" onclick="pickColor('yellow')">🟡 Jaune</button>
+  </div>
+</div>
+
+<!-- WINNER OVERLAY -->
+<div id="winnerOverlay">
+  <div class="winner-text" id="winnerText">🏆 Victoire !</div>
+  <div style="color:rgba(255,255,255,.6);font-size:clamp(14px,2.5vw,20px)" id="winnerSub"></div>
+  <button class="btn-red" style="margin-top:10px;min-width:180px" onclick="location.reload()">🔄 Rejouer</button>
+</div>
+
+<!-- NOTIF -->
+<div id="notif"></div>
+
+<!-- PROFILE PANEL -->
+<div id="profilePanel" class="overlay-panel">
+  <div class="panel-box">
+    <div class="panel-header">
+      <span class="panel-title" id="profilePanelTitle">Profil</span>
+      <button class="close-btn" onclick="closePanel('profilePanel')">✕</button>
+    </div>
+    <div id="profileContent"></div>
+  </div>
+</div>
+
+<!-- FRIENDS PANEL -->
+<div id="friendsPanel" class="overlay-panel">
+  <div class="panel-box">
+    <div class="panel-header">
+      <span class="panel-title">👥 Mes amis</span>
+      <button class="close-btn" onclick="closePanel('friendsPanel')">✕</button>
+    </div>
+    <div id="friendsContent"></div>
+  </div>
+</div>
+
+<!-- MESSAGES PANEL -->
+<div id="messagesPanel" class="overlay-panel">
+  <div class="panel-box">
+    <div class="panel-header">
+      <span class="panel-title" id="msgPanelTitle">💬 Messages</span>
+      <button class="close-btn" onclick="closeMsgPanel()">✕</button>
+    </div>
+    <div id="messagesContent"></div>
+  </div>
+</div>
+
+<!-- Firebase SDK -->
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+
+const API = 'https://uno-3d-backend.onrender.com';
+const FIREBASE_CONFIG = {
+  apiKey: 'AIzaSyCKEAYrkQnrg1WHeu0LBx6NPQPBCc_BKwM',
+  authDomain: 'uno-3d-game.firebaseapp.com',
+  projectId: 'uno-3d-game',
+  storageBucket: 'uno-3d-game.firebasestorage.app',
+  messagingSenderId: '798019294102',
+  appId: '1:798019294102:web:0048036e7912bc8d8c43b7',
+  measurementId: 'G-R2FVYLC69M'
+};
+
+function authErrorMessage(error) {
+  const code = error?.code || '';
+  if (code === 'auth/unauthorized-domain') return 'Domaine Vercel non autorise dans Firebase';
+  if (code === 'auth/popup-blocked') return 'Popup bloquee, redirection Google...';
+  if (code === 'auth/popup-closed-by-user') return 'Connexion annulee';
+  if (code === 'auth/network-request-failed') return 'Erreur reseau Firebase';
+  return 'Erreur de connexion: ' + (code || 'inconnue');
+}
+
+async function apiFetch(path, options) {
+  const r = await fetch(API + path, options);
+  const data = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(data.error || ('HTTP ' + r.status));
+  return data;
+}
+
+// Firebase auth uses the public web config directly. Mongo user data stays on the backend.
+async function loadFirebase() {
+  try {
+    const app = initializeApp(FIREBASE_CONFIG);
+    const auth = getAuth(app);
+    window._auth = auth;
+    window._provider = new GoogleAuthProvider();
+    window._provider.setCustomParameters({ prompt: 'select_account' });
+    onAuthStateChanged(auth, handleAuthChange);
+    getRedirectResult(auth).catch(e => {
+      console.error('Firebase redirect failed:', e);
+      showNotif(authErrorMessage(e), '#e8304a');
+    });
+  } catch(e) {
+    console.error('Firebase init failed:', e);
+    showNotif('Firebase non initialise', '#e8304a');
+  }
+}
+loadFirebase();
+
+async function handleAuthChange(firebaseUser) {
+  if (!firebaseUser) {
+    window._currentUser = null;
+    updateMenuForAnon();
+    return;
+  }
+  try {
+    const user = await apiFetch('/api/users/by-google/' + firebaseUser.uid);
+    window._currentUser = { ...user, firebaseUser };
+    updateMenuForUser(user);
+    refreshBadges();
+  } catch(e) {
+    window._pendingFirebaseUser = firebaseUser;
+    showUsernameModal();
+  }
+}
+
+window.signInGoogle = async function() {
+  if (!window._auth) return showNotif('Firebase non charge', '#e8304a');
+  try {
+    await signInWithPopup(window._auth, window._provider);
+  } catch(e) {
+    console.error('Google sign-in failed:', e);
+    if (e.code === 'auth/popup-blocked') {
+      showNotif(authErrorMessage(e), '#f5c800');
+      await signInWithRedirect(window._auth, window._provider);
+      return;
+    }
+    if (e.code !== 'auth/popup-closed-by-user') showNotif(authErrorMessage(e), '#e8304a');
+  }
+};
+
+window.signOutGoogle = async function() {
+  if (!window._auth) return;
+  await signOut(window._auth);
+  window._currentUser = null;
+  updateMenuForAnon();
+  showNotif('Déconnecté', '#f5c800');
+};
+
+window.submitUsername = async function() {
+  const val = document.getElementById('usernameInput').value.trim();
+  const errEl = document.getElementById('usernameError');
+  errEl.textContent = '';
+  if (!val || val.length < 2 || val.length > 20) { errEl.textContent = 'Pseudo invalide (2-20 caractères)'; return; }
+  // Check availability
+  const chkData = await apiFetch('/api/users/check-username/' + encodeURIComponent(val));
+  if (!chkData.available) { errEl.textContent = chkData.reason || 'Ce pseudo est déjà pris !'; return; }
+  // Register
+  const fb = window._pendingFirebaseUser;
+  if (!fb) return;
+  const data = await apiFetch('/api/users/google-auth', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ googleId: fb.uid, email: fb.email, displayName: fb.displayName, photoURL: fb.photoURL, username: val })
+  });
+  if (data.usernameTaken) { errEl.textContent = 'Ce pseudo est déjà pris !'; return; }
+  if (data.user) {
+    window._currentUser = { ...data.user, firebaseUser: fb };
+    window._pendingFirebaseUser = null;
+    document.getElementById('usernameModal').classList.remove('show');
+    updateMenuForUser(data.user);
+    showNotif('Bienvenue ' + val + ' ! 🎉', '#2ec05e');
+    refreshBadges();
+  }
+};
+</script>
+
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+<script>
+const API = 'https://uno-3d-backend.onrender.com';
+const SERVER_URL = API;
+const socket = io(SERVER_URL, { transports: ['websocket'] });
+
+let myId = null, roomCode = null, state = null;
+let pendingWildCard = null;
+let currentMsgFriend = null;
+let msgPollInterval = null;
+
+socket.on('connect', () => { myId = socket.id; });
+socket.on('roomCreated', data => {
+  roomCode = data.code;
+  document.getElementById('roomCode').textContent = data.code;
+  hideAll(); show('createScreen');
+});
+socket.on('roomJoined', data => { roomCode = data.code; hideAll(); show('gameUI'); });
+socket.on('gameState', gs => {
+  state = gs;
+  if (gs.phase === 'playing') { hideAll(); show('gameUI'); renderGame(); }
+  if (gs.phase === 'over') { showWinner(gs.winner); saveGameResult(gs); }
+});
+socket.on('error', msg => showNotif(msg, '#e8304a'));
+
+function hideAll() {
+  document.querySelectorAll('.screen,#gameUI').forEach(el => el.classList.add('hidden'));
+}
+function show(id) { document.getElementById(id).classList.remove('hidden'); }
+function backMenu() { hideAll(); show('menuScreen'); }
+
+function getPlayerName() {
+  if (window._currentUser) return window._currentUser.username;
+  const n = document.getElementById('nameInput').value.trim();
+  if (n) return n;
+  // Generate anonymous
+  const anon = 'Anonyme' + Math.floor(10000 + Math.random() * 90000);
+  document.getElementById('nameInput').value = anon;
+  return anon;
+}
+
+function startSolo() {
+  const name = getPlayerName();
+  socket.emit('createRoom', { name, botCount: 3 });
+  setTimeout(() => socket.emit('startGame', { code: roomCode }), 1000);
+}
+function showCreate() {
+  const name = getPlayerName();
+  socket.emit('createRoom', { name, botCount: 0 });
+}
+function showJoin() { hideAll(); show('joinScreen'); }
+function joinRoom() {
+  const name = getPlayerName();
+  const code = document.getElementById('joinCode').value.toUpperCase();
+  socket.emit('joinRoom', { code, name });
+}
+function startOnlineGame() { socket.emit('startGame', { code: roomCode }); }
+
+function updateMenuForAnon() {
+  document.getElementById('googleAuthBtn').innerHTML = `
+    <button class="btn-google" onclick="signInGoogle()" style="width:100%">
+      <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.08 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.35-8.16 2.35-6.26 0-11.57-3.59-13.46-8.76l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+      Se connecter avec Google
+    </button>`;
+  document.getElementById('nameRow').style.display = 'flex';
+  document.getElementById('profileNavBtn').style.display = 'none';
+}
+
+function updateMenuForUser(user) {
+  const photo = user.photoURL
+    ? `<img src="${user.photoURL}" style="width:22px;height:22px;border-radius:50%">`
+    : `<span style="font-size:18px">👤</span>`;
+  document.getElementById('googleAuthBtn').innerHTML = `
+    <div class="google-connected">
+      ${photo}
+      <span>Connecté en tant que <b>${user.username}</b>${user.verified ? ' ✓' : ''}</span>
+      <button onclick="signOutGoogle()" style="background:rgba(255,255,255,.1);border:none;color:rgba(255,255,255,.6);border-radius:8px;padding:3px 8px;font-size:11px;cursor:pointer;margin-left:auto">Déco</button>
+    </div>`;
+  document.getElementById('nameRow').style.display = 'none';
+  document.getElementById('profileNavBtn').style.display = 'flex';
+}
+
+function showUsernameModal() {
+  document.getElementById('usernameModal').classList.add('show');
+  document.getElementById('usernameInput').focus();
+}
+
+// ── PROFILE ──────────────────────────────────────────────────────────────────
+async function openOwnProfile() {
+  if (!window._currentUser) return;
+  openProfile(window._currentUser.username);
+}
+
+async function openProfile(username) {
+  document.getElementById('profilePanel').classList.add('show');
+  document.getElementById('profilePanelTitle').textContent = 'Profil';
+  document.getElementById('profileContent').innerHTML = '<div style="text-align:center;padding:20px;color:rgba(255,255,255,.5)">Chargement...</div>';
+  try {
+    const r = await fetch(API + '/api/users/profile/' + encodeURIComponent(username));
+    if (!r.ok) { document.getElementById('profileContent').innerHTML = '<p style="color:#e8304a">Profil introuvable</p>'; return; }
+    const user = await r.json();
+    const isMe = window._currentUser && window._currentUser.username === username;
+    const isLoggedIn = !!window._currentUser;
+    const isFollowing = isLoggedIn && (window._currentUser.following || []).includes(username);
+    const isFriend = isLoggedIn && (window._currentUser.friends || []).includes(username);
+    const alreadyRequested = false; // could check
+
+    const photo = user.photoURL
+      ? `<img src="${user.photoURL}" class="profile-avatar">`
+      : `<div class="profile-avatar-default">${username[0].toUpperCase()}</div>`;
+
+    const followBtn = !isMe && isLoggedIn ? `
+      <button class="mini-btn" style="background:${isFollowing ? 'rgba(255,255,255,.1)' : 'linear-gradient(160deg,#3a8de8,#2473cc)'};color:#fff"
+        onclick="toggleFollow('${username}', ${isFollowing})">
+        ${isFollowing ? '✓ Suivi' : '+ Suivre'}
+      </button>` : '';
+    const friendBtn = !isMe && isLoggedIn && !isFriend ? `
+      <button class="mini-btn" style="background:linear-gradient(160deg,#45d975,#2ec05e);color:#fff"
+        onclick="sendFriendRequest('${username}')">
+        👥 Ajouter
+      </button>` : isFriend ? `<span style="color:#2ec05e;font-size:12px;font-weight:700">✓ Amis</span>` : '';
+
+    const games = (user.recentGames || []).slice(0, 5);
+    const gamesHtml = games.length ? games.map(g => `
+      <div class="game-item">
+        <div>
+          <div style="font-size:13px;font-weight:700">${g.players ? g.players.join(', ') : 'Partie'}</div>
+          <div class="game-date">${g.date ? new Date(g.date).toLocaleDateString('fr-FR') : ''}</div>
+        </div>
+        <span class="${g.winner === username ? 'result-win' : 'result-lose'}">${g.winner === username ? '🏆 Victoire' : '💀 Défaite'}</span>
+      </div>`).join('') : '<p style="color:rgba(255,255,255,.4);font-size:13px;text-align:center">Aucune partie récente</p>';
+
+    document.getElementById('profileContent').innerHTML = `
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px">
+        ${photo}
+        <div style="flex:1">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <span style="font-size:clamp(16px,3vw,22px);font-weight:900">${user.username}</span>
+            ${user.verified ? '<span class="verified-badge">✓ Vérifié</span>' : ''}
+          </div>
+          <div style="color:rgba(255,255,255,.5);font-size:12px;margin-top:2px">${user.followers ? user.followers.length : 0} abonnés · ${user.following ? user.following.length : 0} abonnements</div>
+          <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">${followBtn}${friendBtn}</div>
+        </div>
+      </div>
+      <div style="border-top:1px solid rgba(255,255,255,.08);padding-top:14px">
+        <div style="font-size:13px;font-weight:700;color:rgba(255,255,255,.5);margin-bottom:10px;letter-spacing:.5px">PARTIES RÉCENTES</div>
+        <div style="display:flex;flex-direction:column;gap:8px">${gamesHtml}</div>
+      </div>`;
+  } catch(e) { document.getElementById('profileContent').innerHTML = '<p style="color:#e8304a">Erreur de chargement</p>'; }
+}
+
+async function toggleFollow(username, isFollowing) {
+  if (!window._currentUser) return;
+  const endpoint = isFollowing ? '/api/users/unfollow' : '/api/users/follow';
+  await fetch(API + endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ googleId: window._currentUser.googleId, targetUsername: username }) });
+  if (isFollowing) {
+    window._currentUser.following = (window._currentUser.following || []).filter(u => u !== username);
+  } else {
+    window._currentUser.following = [...(window._currentUser.following || []), username];
+  }
+  openProfile(username);
+  showNotif(isFollowing ? 'Abonnement annulé' : 'Abonné à ' + username + ' !', '#2ec05e');
+}
+
+async function sendFriendRequest(username) {
+  if (!window._currentUser) return;
+  const r = await fetch(API + '/api/friends/request', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ googleId: window._currentUser.googleId, targetUsername: username }) });
+  const data = await r.json();
+  if (data.alreadyFriends) { showNotif('Vous êtes déjà amis !', '#f5c800'); return; }
+  showNotif('Demande envoyée à ' + username + ' !', '#2ec05e');
+  openProfile(username);
+}
+
+// ── FRIENDS ──────────────────────────────────────────────────────────────────
+async function openFriends() {
+  if (!window._currentUser) { showNotif('Connecte-toi avec Google pour voir tes amis !', '#f5c800'); return; }
+  document.getElementById('friendsPanel').classList.add('show');
+  document.getElementById('friendsContent').innerHTML = '<div style="text-align:center;padding:20px;color:rgba(255,255,255,.5)">Chargement...</div>';
+  try {
+    const r = await fetch(API + '/api/friends/' + window._currentUser.googleId);
+    const data = await r.json();
+    const { friends, requests } = data;
+
+    const reqHtml = (requests || []).length ? `
+      <div style="margin-bottom:14px">
+        <div style="font-size:12px;font-weight:700;color:rgba(255,255,255,.4);margin-bottom:8px;letter-spacing:.5px">DEMANDES EN ATTENTE</div>
+        ${requests.map(req => `
+          <div class="req-item">
+            <span style="font-size:20px">👋</span>
+            <div style="flex:1">
+              <div style="font-weight:700;cursor:pointer;text-decoration:underline" onclick="closePanel('friendsPanel');openProfile('${req.from}')">${req.from}</div>
+              <div style="font-size:11px;color:rgba(255,255,255,.4)">${new Date(req.date).toLocaleDateString('fr-FR')}</div>
+            </div>
+            <button class="mini-btn" style="background:linear-gradient(160deg,#45d975,#2ec05e);color:#fff" onclick="acceptFriend('${req.from}')">✓</button>
+            <button class="mini-btn" style="background:rgba(255,0,0,.2);color:#e8304a;border:1px solid rgba(232,48,74,.3)" onclick="declineFriend('${req.from}')">✕</button>
+          </div>`).join('')}
+      </div>` : '';
+
+    const friendsHtml = friends.length ? friends.map(f => `
+      <div class="friend-item">
+        <div class="friend-avatar">${f.username[0].toUpperCase()}</div>
+        <div style="flex:1">
+          <div class="friend-name" style="cursor:pointer;text-decoration:underline" onclick="closePanel('friendsPanel');openProfile('${f.username}')">${f.username}${f.verified ? ' ✓' : ''}</div>
+        </div>
+        <div class="friend-actions">
+          <button class="mini-btn" style="background:linear-gradient(160deg,#3a8de8,#2473cc);color:#fff" onclick="openChat('${f.username}')">💬</button>
+        </div>
+      </div>`).join('') : '<p style="color:rgba(255,255,255,.4);font-size:13px;text-align:center;padding:10px">Aucun ami pour l\'instant</p>';
+
+    document.getElementById('friendsContent').innerHTML = reqHtml +
+      `<div style="font-size:12px;font-weight:700;color:rgba(255,255,255,.4);margin-bottom:8px;letter-spacing:.5px">AMIS (${friends.length})</div>` + friendsHtml;
+  } catch(e) { document.getElementById('friendsContent').innerHTML = '<p style="color:#e8304a">Erreur</p>'; }
+}
+
+async function acceptFriend(fromUsername) {
+  if (!window._currentUser) return;
+  await fetch(API + '/api/friends/accept', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ googleId: window._currentUser.googleId, fromUsername }) });
+  window._currentUser.friends = [...(window._currentUser.friends || []), fromUsername];
+  showNotif(fromUsername + ' est maintenant ton ami ! 🎉', '#2ec05e');
+  openFriends(); refreshBadges();
+}
+
+async function declineFriend(fromUsername) {
+  if (!window._currentUser) return;
+  await fetch(API + '/api/friends/decline', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ googleId: window._currentUser.googleId, fromUsername }) });
+  openFriends(); refreshBadges();
+}
+
+// ── MESSAGES ─────────────────────────────────────────────────────────────────
+async function openMessages() {
+  if (!window._currentUser) { showNotif('Connecte-toi avec Google pour envoyer des messages !', '#f5c800'); return; }
+  currentMsgFriend = null;
+  document.getElementById('msgPanelTitle').textContent = '💬 Messages';
+  document.getElementById('messagesPanel').classList.add('show');
+  // Show friend list to choose
+  const r = await fetch(API + '/api/friends/' + window._currentUser.googleId);
+  const data = await r.json();
+  const unreadR = await fetch(API + '/api/messages/unread/' + window._currentUser.googleId);
+  const unreadData = await unreadR.json();
+  const unread = unreadData.unread || {};
+  const friends = data.friends || [];
+  if (!friends.length) {
+    document.getElementById('messagesContent').innerHTML = '<p style="color:rgba(255,255,255,.4);font-size:13px;text-align:center;padding:20px">Ajoute des amis pour leur écrire !</p>';
+    return;
+  }
+  document.getElementById('messagesContent').innerHTML = `
+    <p style="color:rgba(255,255,255,.5);font-size:13px;margin-bottom:10px">Choisis un ami :</p>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      ${friends.map(f => `
+        <div class="friend-item" style="cursor:pointer" onclick="openChat('${f.username}')">
+          <div class="friend-avatar">${f.username[0].toUpperCase()}</div>
+          <div class="friend-name">${f.username}</div>
+          ${unread[f.username] ? `<div class="unread-badge">${unread[f.username]}</div>` : ''}
+        </div>`).join('')}
+    </div>`;
+}
+
+async function openChat(friendUsername) {
+  closePanel('friendsPanel');
+  currentMsgFriend = friendUsername;
+  document.getElementById('msgPanelTitle').textContent = '💬 ' + friendUsername;
+  document.getElementById('messagesPanel').classList.add('show');
+  await loadMessages(friendUsername);
+  if (msgPollInterval) clearInterval(msgPollInterval);
+  msgPollInterval = setInterval(() => { if (currentMsgFriend) loadMessages(currentMsgFriend, true); }, 3000);
+}
+
+async function loadMessages(friendUsername, silent = false) {
+  if (!window._currentUser) return;
+  if (!silent) document.getElementById('messagesContent').innerHTML = '<div style="text-align:center;padding:10px;color:rgba(255,255,255,.4)">Chargement...</div>';
+  try {
+    const r = await fetch(API + '/api/messages/' + window._currentUser.googleId + '/' + encodeURIComponent(friendUsername));
+    const msgs = await r.json();
+    const me = window._currentUser.username;
+    const msgsHtml = msgs.map(m => {
+      const isMe = m.from === me;
+      return `<div style="display:flex;flex-direction:column;align-items:${isMe ? 'flex-end' : 'flex-start'}">
+        <div class="msg-bubble ${isMe ? 'msg-me' : 'msg-them'}">${escHtml(m.content)}</div>
+        <div class="msg-time">${new Date(m.date).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</div>
+      </div>`;
+    }).join('');
+    document.getElementById('messagesContent').innerHTML = `
+      <div class="msg-list" id="msgList">${msgsHtml || '<p style="color:rgba(255,255,255,.4);font-size:13px;text-align:center;padding:20px">Commence la conversation !</p>'}</div>
+      <div class="msg-input-row" style="margin-top:10px">
+        <input id="msgInput" placeholder="Ton message..." maxlength="500" onkeydown="if(event.key==='Enter')sendMessage()"/>
+        <button class="msg-send-btn" onclick="sendMessage()">➤</button>
+      </div>`;
+    const list = document.getElementById('msgList');
+    if (list) list.scrollTop = list.scrollHeight;
+  } catch(e) {}
+}
+
+async function sendMessage() {
+  if (!window._currentUser || !currentMsgFriend) return;
+  const inp = document.getElementById('msgInput');
+  const content = inp.value.trim();
+  if (!content) return;
+  inp.value = '';
+  await fetch(API + '/api/messages/send', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ googleId: window._currentUser.googleId, toUsername: currentMsgFriend, content }) });
+  loadMessages(currentMsgFriend, true);
+}
+
+function closeMsgPanel() {
+  if (msgPollInterval) { clearInterval(msgPollInterval); msgPollInterval = null; }
+  currentMsgFriend = null;
+  closePanel('messagesPanel');
+}
+
+async function refreshBadges() {
+  if (!window._currentUser) return;
+  try {
+    const fr = await fetch(API + '/api/friends/' + window._currentUser.googleId);
+    const fd = await fr.json();
+    const reqCount = (fd.requests || []).length;
+    const badge = document.getElementById('friendReqBadge');
+    badge.style.display = reqCount ? 'inline-flex' : 'none';
+    badge.textContent = reqCount;
+    const ur = await fetch(API + '/api/messages/unread/' + window._currentUser.googleId);
+    const ud = await ur.json();
+    const totalUnread = Object.values(ud.unread || {}).reduce((a, b) => a + b, 0);
+    const msgB = document.getElementById('msgBadge');
+    msgB.style.display = totalUnread ? 'inline-flex' : 'none';
+    msgB.textContent = totalUnread;
+  } catch(e) {}
+}
+setInterval(() => { if (window._currentUser) refreshBadges(); }, 15000);
+
+function closePanel(id) { document.getElementById(id).classList.remove('show'); }
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+async function saveGameResult(gs) {
+  if (!window._currentUser) return;
+  try {
+    await fetch(API + '/api/users/game-result', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        googleId: window._currentUser.googleId,
+        result: { players: gs.players.map(p => p.name), winner: gs.winner, roomCode: gs.code }
+      }) });
+    // refresh local user
+    const r = await fetch(API + '/api/users/by-google/' + window._currentUser.googleId);
+    if (r.ok) { const u = await r.json(); window._currentUser = { ...window._currentUser, ...u }; }
+  } catch(e) {}
+}
+
+// ── GAME RENDER ───────────────────────────────────────────────────────────────
+function renderGame() {
+  const me = state.players.find(p => p.id === myId);
+  if (!me) return;
+  renderPlayers(); renderTopCard(); renderHand(me.hand); renderOpponents();
+  const myIndex = state.players.findIndex(p => p.id === myId);
+  const isMyTurn = state.currentTurn === myIndex;
+  const statusEl = document.getElementById('status');
+  statusEl.textContent = isMyTurn ? '🎯 TON TOUR !' : '⏳ Tour adverse';
+  statusEl.className = isMyTurn ? 'my-turn' : '';
+  document.getElementById('drawBtn').style.opacity = isMyTurn ? '1' : '0.5';
+  if (me.hand.length === 1) showUnoBadge();
+}
+
+function renderPlayers() {
+  const div = document.getElementById('players'); div.innerHTML = '';
+  state.players.forEach((p, i) => {
+    const el = document.createElement('div');
+    el.className = 'player' + (state.currentTurn === i ? ' active' : '');
+    const canClick = p.name !== '🤖 Aria' && p.name !== '🤖 Neo' && p.name !== '🤖 Orion';
+    el.innerHTML = `<span class="dot"></span><span style="${canClick ? 'cursor:pointer;text-decoration:underline' : ''}"
+      ${canClick ? `onclick="openProfile('${p.name}')"` : ''}>${p.name}</span>
+      <span style="opacity:.6">(${p.handCount})</span>`;
+    div.appendChild(el);
+  });
+}
+
+function renderTopCard() {
+  const card = state.topCard; if (!card) return;
+  const div = document.getElementById('topCard');
+  const prev = div.className; div.className = ''; div.innerHTML = '';
+  const cls = card.color === 'wild' ? 'c-wild' : ('c-' + card.color);
+  div.classList.add(cls);
+  const lbl = getLabel(card.value);
+  div.innerHTML = `<span class="card-val">${lbl}</span>${lbl}<span class="card-val-bot">${lbl}</span>`;
+  if (prev !== cls) div.classList.add('flip-anim');
+  setTimeout(() => div.classList.remove('flip-anim'), 600);
+}
+
+function renderHand(hand) {
+  const div = document.getElementById('hand'); div.innerHTML = '';
+  hand.forEach((card, idx) => {
+    const el = document.createElement('div');
+    const cls = card.color === 'wild' ? 'c-wild' : ('c-' + card.color);
+    el.className = 'card ' + cls;
+    const lbl = getLabel(card.value);
+    el.innerHTML = `<span class="card-val">${lbl}</span>${lbl}<span class="card-val-bot">${lbl}</span>`;
+    el.style.animationDelay = (idx * .05) + 's';
+    el.classList.add('drawn');
+    el.onclick = () => playCard(card, el);
+    div.appendChild(el);
+  });
+}
+
+function renderOpponents() {
+  const me = state.players.findIndex(p => p.id === myId);
+  const others = state.players.filter((_, i) => i !== me);
+  ['opp-top', 'opp-left', 'opp-right'].forEach((pos, idx) => {
+    const div = document.getElementById(pos); div.innerHTML = '';
+    const opp = others[idx]; if (!opp) return;
+    for (let i = 0; i < Math.min(opp.handCount, 10); i++) {
+      const c = document.createElement('div'); c.className = 'opp-card'; div.appendChild(c);
+    }
+  });
+  if (state.deckCount !== undefined)
+    document.getElementById('deckCount').textContent = state.deckCount + ' cartes';
+}
+
+function playCard(card, el) {
+  const myIndex = state.players.findIndex(p => p.id === myId);
+  if (state.currentTurn !== myIndex) { showNotif("Ce n'est pas ton tour !", '#f5c800'); return; }
+  if (card.value === 'wild' || card.value === 'wild4') {
+    pendingWildCard = card;
+    document.getElementById('colorPicker').classList.add('show');
+    return;
+  }
+  socket.emit('playCard', { code: roomCode, cardId: card.id, chosenColor: null });
+}
+
+function pickColor(color) {
+  document.getElementById('colorPicker').classList.remove('show');
+  if (!pendingWildCard) return;
+  const card = pendingWildCard; pendingWildCard = null;
+  socket.emit('playCard', { code: roomCode, cardId: card.id, chosenColor: color });
+}
+
+function drawCard() { socket.emit('drawCard', { code: roomCode }); }
+
+function getLabel(v) {
+  if (v === 'skip') return '⊘';
+  if (v === 'reverse') return '↺';
+  if (v === 'draw2') return '+2';
+  if (v === 'wild') return '★';
+  if (v === 'wild4') return '+4';
+  return v;
+}
+
+function showUnoBadge() {
+  const b = document.getElementById('unoBadge');
+  b.style.display = 'block'; b.style.animation = 'none';
+  void b.offsetWidth; b.style.animation = 'unoPop .6s cubic-bezier(.34,1.56,.64,1)';
+  setTimeout(() => b.style.display = 'none', 2000);
+}
+
+function showNotif(msg, color = 'rgba(255,255,255,.9)') {
+  const n = document.getElementById('notif');
+  n.textContent = msg; n.style.color = color; n.classList.add('show');
+  clearTimeout(n._t); n._t = setTimeout(() => n.classList.remove('show'), 2500);
+}
+
+function showWinner(winner) {
+  document.getElementById('winnerText').textContent = winner === (window._currentUser?.username || '') || state.players.find(p => p.id === myId)?.name === winner ? '🏆 Tu as gagné !!' : '😞 ' + winner + ' a gagné';
+  document.getElementById('winnerSub').textContent = ''; 
+  document.getElementById('winnerOverlay').classList.add('show');
+  if (state.players.find(p => p.id === myId)?.name === winner) launchConfetti();
+}
+
+function launchConfetti() {
+  const emojis = ['🎉', '🎊', '⭐', '🌟', '✨', '🎈', '🎀'];
+  for (let i = 0; i < 20; i++) {
+    const el = document.createElement('div'); el.className = 'confetti';
+    el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+    el.style.left = Math.random() * 100 + 'vw';
+    el.style.animationDuration = (2 + Math.random() * 2) + 's';
+    el.style.animationDelay = Math.random() + 's';
+    document.body.appendChild(el);
+    el.addEventListener('animationend', () => el.remove());
+  }
+}
+</script>
+</body>
+</html>
