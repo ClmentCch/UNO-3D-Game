@@ -56,14 +56,26 @@ function isValidUsername(username) {
   return /^[\p{L}\p{N}_ -]{2,20}$/u.test(username);
 }
 
+const ADMIN_EMAIL = 'clementcochie@gmail.com';
+const ADMIN_USERNAME = 'clmentcch';
+
 function publicUser(user, includePrivate = false) {
   if (!user) return null;
   const out = { ...user, _id: user._id.toString() };
+  out.level = Number(out.level || 1);
+  out.xp = Number(out.xp || 0);
+  out.gamesPlayed = Number(out.gamesPlayed || 0);
+  out.wins = Number(out.wins || 0);
+  out.displayName = out.displayName || out.username;
   if (!includePrivate) {
     delete out.googleId;
     delete out.email;
   }
   return out;
+}
+
+function isAdminUser(user) {
+  return Boolean(user && String(user.email || '').toLowerCase() === ADMIN_EMAIL && String(user.username || '').toLowerCase() === ADMIN_USERNAME);
 }
 
 function usernameQuery(username) {
@@ -151,6 +163,9 @@ app.post('/api/users/google-auth', async (req, res) => {
   let user = await col.findOne({ googleId });
 
   if (user) {
+    if (String(user.username || '').toLowerCase() === ADMIN_USERNAME && String(user.email || '').toLowerCase() !== ADMIN_EMAIL) {
+      return res.status(403).json({ error: 'Ce pseudo est reserve' });
+    }
     // Already registered, return user
     await col.updateOne({ googleId }, { $set: { lastLogin: new Date() } });
     return res.json({ user: publicUser(user, true) });
@@ -165,6 +180,9 @@ app.post('/api/users/google-auth', async (req, res) => {
 
   // Check username unique
   const usernameLower = cleanUsername.toLowerCase();
+  if (usernameLower === ADMIN_USERNAME && String(email).toLowerCase() !== ADMIN_EMAIL) {
+    return res.status(403).json({ error: 'Ce pseudo est reserve' });
+  }
   const taken = await col.findOne({
     $or: [
       { usernameLower },
@@ -174,11 +192,12 @@ app.post('/api/users/google-auth', async (req, res) => {
   if (taken) return res.json({ usernameTaken: true });
 
   // Verified user: ClmentCch gets a badge
-  const verified = usernameLower === 'clmentcch';
+  const verified = usernameLower === ADMIN_USERNAME && String(email).toLowerCase() === ADMIN_EMAIL;
 
   const newUser = {
     googleId, email, displayName, photoURL,
     username: cleanUsername,
+    displayName: cleanUsername,
     usernameLower,
     verified,
     createdAt: new Date(),
@@ -187,6 +206,10 @@ app.post('/api/users/google-auth', async (req, res) => {
     friendRequests: [],
     followers: [],
     following: [],
+    level: 1,
+    xp: 0,
+    gamesPlayed: 0,
+    wins: 0,
     recentGames: []
   };
   const result = await col.insertOne(newUser);
@@ -214,16 +237,70 @@ app.get('/api/users/by-google/:googleId', async (req, res) => {
   res.json(publicUser(user, true));
 });
 
+app.post('/api/users/update-profile', async (req, res) => {
+  const { googleId, displayName, photoURL } = req.body;
+  const col = getCol('users');
+  if (!col) return res.status(500).json({ error: 'DB unavailable' });
+  const user = await col.findOne({ googleId });
+  if (!user) return res.status(404).json({ error: 'Not found' });
+  const update = {};
+  if (displayName !== undefined) {
+    const cleanDisplayName = String(displayName || '').trim().slice(0, 24);
+    if (cleanDisplayName.length < 2) return res.status(400).json({ error: 'Nom invalide' });
+    update.displayName = cleanDisplayName;
+  }
+  if (photoURL !== undefined) update.photoURL = String(photoURL || '').trim().slice(0, 300000);
+  await col.updateOne({ googleId }, { $set: update });
+  const fresh = await col.findOne({ googleId });
+  res.json({ user: publicUser(fresh, true) });
+});
+
 // Save game result
 app.post('/api/users/game-result', async (req, res) => {
   const { googleId, result } = req.body;
   // result: { roomCode, players, winner, date, position }
   const col = getCol('users');
   if (!col) return res.status(500).json({ error: 'DB unavailable' });
+  const user = await col.findOne({ googleId });
+  if (!user) return res.status(404).json({ error: 'Not found' });
+  const gamesPlayed = Number(user.gamesPlayed || 0) + 1;
+  const didWin = result?.winnerUsername
+    ? result.winnerUsername === user.username
+    : result?.winner === user.username || result?.winner === user.displayName;
+  const wins = Number(user.wins || 0) + (didWin ? 1 : 0);
+  const levelFromGames = Math.floor(gamesPlayed / 3);
+  const level = Math.max(1, 1 + wins + levelFromGames + Number(user.adminLevelBonus || 0));
   await col.updateOne({ googleId }, {
-    $push: { recentGames: { $each: [{ ...result, date: new Date() }], $slice: -5, $position: 0 } }
+    $set: { gamesPlayed, wins, level },
+    $inc: { xp: didWin ? 100 : 35 },
+    $push: { recentGames: { $each: [{ ...result, winnerUsername: result?.winnerUsername, date: new Date() }], $slice: -5, $position: 0 } }
   });
-  res.json({ ok: true });
+  const fresh = await col.findOne({ googleId });
+  res.json({ ok: true, user: publicUser(fresh, true) });
+});
+
+app.post('/api/admin/user', async (req, res) => {
+  const { googleId, targetUsername, xp, levels, verified } = req.body;
+  const col = getCol('users');
+  if (!col) return res.status(500).json({ error: 'DB unavailable' });
+  const admin = await col.findOne({ googleId });
+  if (!isAdminUser(admin)) return res.status(403).json({ error: 'Admin only' });
+  const target = await col.findOne(usernameQuery(targetUsername));
+  if (!target) return res.status(404).json({ error: 'User not found' });
+  const update = {};
+  const inc = {};
+  if (xp !== undefined) inc.xp = Number(xp) || 0;
+  if (levels !== undefined) {
+    inc.adminLevelBonus = Number(levels) || 0;
+    update.level = Math.max(1, Number(target.level || 1) + (Number(levels) || 0));
+  }
+  if (verified !== undefined) update.verified = Boolean(verified);
+  const op = {};
+  if (Object.keys(update).length) op.$set = update;
+  if (Object.keys(inc).length) op.$inc = inc;
+  if (Object.keys(op).length) await col.updateOne({ _id: target._id }, op);
+  const fresh = await col.findOne({ _id: target._id });
+  res.json({ ok: true, user: publicUser(fresh, true) });
 });
 
 // ─── FOLLOW ROUTES ────────────────────────────────────────────────────────────
@@ -409,6 +486,14 @@ function shuffle(arr) {
 
 function cardId() { return Math.random().toString(36).slice(2, 9); }
 function stampDeck(deck) { return deck.map(c => ({ ...c, id: cardId() })); }
+function makeCard(color, value) {
+  const normalizedValue = String(value);
+  const normalizedColor = normalizedValue === 'wild' || normalizedValue === 'wild4' ? 'wild' : color;
+  const type = normalizedValue === 'wild' || normalizedValue === 'wild4'
+    ? 'wild'
+    : SPECIAL.includes(normalizedValue) ? 'special' : 'number';
+  return { id: cardId(), color: normalizedColor, value: normalizedValue, type };
+}
 
 function canPlay(card, topCard, currentColor) {
   if (!topCard) return true;
@@ -421,11 +506,11 @@ function canPlay(card, topCard, currentColor) {
 
 const rooms = {};
 
-function createRoom(roomCode, hostId, hostName) {
+function createRoom(roomCode, hostId, hostName, meta = {}) {
   const deck = shuffle(stampDeck(buildDeck()));
   const room = {
     code: roomCode, hostId,
-    players: [{ id: hostId, name: hostName, hand: [], isBot: false, unoAlert: false }],
+    players: [{ id: hostId, name: hostName, username: meta.username || hostName, googleId: meta.googleId || null, level: meta.level || 1, verified: Boolean(meta.verified), hand: [], isBot: false, unoAlert: false }],
     deck, discard: [], currentTurn: 0, direction: 1,
     currentColor: null, phase: 'lobby', drawStack: 0,
     winner: null, lastAction: null
@@ -435,6 +520,11 @@ function createRoom(roomCode, hostId, hostName) {
 }
 
 function drawFromDeck(room) {
+  if (room.nextDrawCard) {
+    const card = room.nextDrawCard;
+    room.nextDrawCard = null;
+    return card;
+  }
   if (room.deck.length === 0) {
     const top = room.discard.pop();
     room.deck = shuffle([...room.discard]);
@@ -470,9 +560,9 @@ function roomPublicState(room, forPlayerId) {
     code: room.code, phase: room.phase, currentTurn: room.currentTurn,
     direction: room.direction, currentColor: room.currentColor,
     drawStack: room.drawStack, topCard: room.discard[room.discard.length - 1] || null,
-    deckCount: room.deck.length, winner: room.winner, lastAction: room.lastAction,
+    deckCount: room.deck.length, winner: room.winner, winnerUsername: room.winnerUsername, lastAction: room.lastAction,
     players: room.players.map(player => ({
-      id: player.id, name: player.name, isBot: player.isBot,
+      id: player.id, name: player.name, username: player.username, googleId: player.googleId, level: player.level || 1, verified: Boolean(player.verified), isBot: player.isBot,
       handCount: player.hand.length, unoAlert: player.unoAlert,
       hand: player.id === forPlayerId ? player.hand : undefined
     }))
@@ -543,12 +633,14 @@ function playCard(room, player, card, chosenColor) {
   room.discard.push(card);
   room.lastAction = `${player.name} joue ${card.color !== 'wild' ? card.color + ' ' : ''}${card.value}`;
   if (player.hand.length === 0) {
-    room.phase = 'over'; room.winner = player.name;
+    room.phase = 'over'; room.winner = player.name; room.winnerUsername = player.username;
     broadcastState(room); return true;
   }
   player.unoAlert = player.hand.length === 1;
-  if (card.type === 'wild') room.currentColor = chosenColor || COLORS[0];
-  else room.currentColor = card.color;
+  if (card.type === 'wild') {
+    room.currentColor = chosenColor || COLORS[0];
+    room.lastAction += ` et choisit ${room.currentColor}`;
+  } else room.currentColor = card.color;
   if (card.value === 'reverse') {
     room.direction *= -1;
     if (room.players.length === 2) nextTurn(room);
@@ -566,9 +658,9 @@ function playCard(room, player, card, chosenColor) {
 io.on('connection', socket => {
   console.log('Connected:', socket.id);
 
-  socket.on('createRoom', ({ name, botCount = 0 }) => {
+  socket.on('createRoom', ({ name, botCount = 0, username, googleId, level, verified }) => {
     const code = Math.random().toString(36).slice(2, 6).toUpperCase();
-    const room = createRoom(code, socket.id, name || 'Joueur');
+    const room = createRoom(code, socket.id, name || 'Joueur', { username, googleId, level, verified });
     socket.join(code);
     const botNames = ['🤖 Aria', '🤖 Neo', '🤖 Orion'];
     for (let i = 0; i < Math.min(botCount, 3); i++) {
@@ -577,12 +669,12 @@ io.on('connection', socket => {
     socket.emit('roomCreated', { code, state: roomPublicState(room, socket.id) });
   });
 
-  socket.on('joinRoom', ({ code, name }) => {
+  socket.on('joinRoom', ({ code, name, username, googleId, level, verified }) => {
     const room = rooms[code];
     if (!room) return socket.emit('error', 'Salle introuvable');
     if (room.phase !== 'lobby') return socket.emit('error', 'Partie déjà commencée');
     if (room.players.length >= 4) return socket.emit('error', 'Salle pleine');
-    room.players.push({ id: socket.id, name: name || 'Joueur', hand: [], isBot: false, unoAlert: false });
+    room.players.push({ id: socket.id, name: name || 'Joueur', username: username || name || 'Joueur', googleId: googleId || null, level: level || 1, verified: Boolean(verified), hand: [], isBot: false, unoAlert: false });
     socket.join(code);
     socket.emit('roomJoined', { code, state: roomPublicState(room, socket.id) });
     broadcastState(room);
@@ -622,6 +714,49 @@ io.on('connection', socket => {
     playCard(room, player, card, chosenColor);
   });
 
+  socket.on('playCards', ({ code, cardIds, chosenColor }) => {
+    const room = rooms[code];
+    if (!room || room.phase !== 'playing') return;
+    const playerIdx = room.players.findIndex(p => p.id === socket.id);
+    if (playerIdx !== room.currentTurn) return socket.emit('error', 'Pas ton tour');
+    const player = room.players[playerIdx];
+    const ids = Array.isArray(cardIds) ? cardIds : [];
+    if (ids.length < 2) return;
+    const cards = ids.map(id => player.hand.find(c => c.id === id)).filter(Boolean);
+    if (cards.length !== ids.length) return;
+    const first = cards[0];
+    if (!cards.every(c => c.value === first.value)) return socket.emit('error', 'Cartes differentes');
+    const top = room.discard[room.discard.length - 1];
+    if (!canPlay(first, top, room.currentColor)) return socket.emit('error', 'Carte non jouable');
+    for (const card of cards) {
+      const idx = player.hand.findIndex(c => c.id === card.id);
+      if (idx !== -1) {
+        player.hand.splice(idx, 1);
+        room.discard.push(card);
+      }
+    }
+    const last = cards[cards.length - 1];
+    room.lastAction = `${player.name} empile ${cards.length} cartes ${first.value}`;
+    if (last.type === 'wild') {
+      room.currentColor = chosenColor || COLORS[0];
+      room.lastAction += ` et choisit ${room.currentColor}`;
+    } else room.currentColor = last.color;
+    if (player.hand.length === 0) {
+      room.phase = 'over'; room.winner = player.name; room.winnerUsername = player.username;
+      broadcastState(room); return;
+    }
+    player.unoAlert = player.hand.length === 1;
+    if (first.value === 'draw2') room.drawStack += 2 * cards.length;
+    else if (first.value === 'wild4') room.drawStack += 4 * cards.length;
+    if (first.value === 'reverse') {
+      if (cards.length % 2 === 1) room.direction *= -1;
+      if (room.players.length === 2) nextTurn(room);
+    } else if (first.value === 'skip') {
+      nextTurn(room, true); broadcastState(room); scheduleBot(room); return;
+    }
+    nextTurn(room); broadcastState(room); scheduleBot(room);
+  });
+
   socket.on('drawCard', ({ code }) => {
     const room = rooms[code];
     if (!room || room.phase !== 'playing') return;
@@ -638,6 +773,30 @@ io.on('connection', socket => {
       room.lastAction = `${player.name} pioche`;
     }
     nextTurn(room); broadcastState(room); scheduleBot(room);
+  });
+
+  socket.on('adminGiveCard', async ({ code, adminGoogleId, targetId, color, value }) => {
+    const room = rooms[code];
+    if (!room) return;
+    const admin = room.players.find(p => p.id === socket.id && p.googleId === adminGoogleId);
+    const adminDoc = getCol('users') ? await getCol('users').findOne({ googleId: adminGoogleId }) : null;
+    if (!admin || !isAdminUser(adminDoc)) return socket.emit('error', 'Admin only');
+    const target = room.players.find(p => p.id === targetId);
+    if (!target) return socket.emit('error', 'Joueur introuvable');
+    target.hand.push(makeCard(color, value));
+    room.lastAction = `Admin donne une carte a ${target.name}`;
+    broadcastState(room);
+  });
+
+  socket.on('adminSetNextDraw', async ({ code, adminGoogleId, color, value }) => {
+    const room = rooms[code];
+    if (!room) return;
+    const admin = room.players.find(p => p.id === socket.id && p.googleId === adminGoogleId);
+    const adminDoc = getCol('users') ? await getCol('users').findOne({ googleId: adminGoogleId }) : null;
+    if (!admin || !isAdminUser(adminDoc)) return socket.emit('error', 'Admin only');
+    room.nextDrawCard = makeCard(color, value);
+    room.lastAction = 'Admin modifie la prochaine pioche';
+    broadcastState(room);
   });
 
   socket.on('restartGame', ({ code }) => {
