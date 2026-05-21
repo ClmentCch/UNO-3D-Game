@@ -417,25 +417,43 @@ window.submitUsername = async function() {
   const errEl = document.getElementById('usernameError');
   errEl.textContent = '';
   if (!val || val.length < 2 || val.length > 20) { errEl.textContent = 'Pseudo invalide (2-20 caractères)'; return; }
-  // Check availability
-  const chkData = await apiFetch('/api/users/check-username/' + encodeURIComponent(val));
-  if (!chkData.available) { errEl.textContent = chkData.reason || 'Ce pseudo est déjà pris !'; return; }
-  // Register
-  const fb = window._pendingFirebaseUser;
-  if (!fb) return;
-  const data = await apiFetch('/api/users/google-auth', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ googleId: fb.uid, email: fb.email, displayName: fb.displayName, photoURL: fb.photoURL, username: val })
-  });
-  if (data.usernameTaken) { errEl.textContent = 'Ce pseudo est déjà pris !'; return; }
-  if (data.user) {
-    window._currentUser = { ...data.user, firebaseUser: fb };
-    window._pendingFirebaseUser = null;
-    document.getElementById('usernameModal').classList.remove('show');
-    updateMenuForUser(data.user);
-    showNotif('Bienvenue ' + val + ' ! 🎉', '#2ec05e');
-    refreshBadges();
+  const btn = document.querySelector('#usernameModal .btn-green');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Vérification...'; }
+  try {
+    const chkData = await apiFetch('/api/users/check-username/' + encodeURIComponent(val));
+    if (!chkData.available) {
+      errEl.textContent = chkData.reason || 'Ce pseudo est déjà pris !';
+      if (btn) { btn.disabled = false; btn.textContent = '✅ Valider'; }
+      return;
+    }
+    const fb = window._pendingFirebaseUser;
+    if (!fb) { errEl.textContent = 'Erreur : session expirée, reconnecte-toi.'; if (btn) { btn.disabled = false; btn.textContent = '✅ Valider'; } return; }
+    if (btn) btn.textContent = '⏳ Création...';
+    const data = await apiFetch('/api/users/google-auth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ googleId: fb.uid, email: fb.email, displayName: fb.displayName, photoURL: fb.photoURL, username: val })
+    });
+    if (data.usernameTaken) {
+      errEl.textContent = 'Ce pseudo est déjà pris !';
+      if (btn) { btn.disabled = false; btn.textContent = '✅ Valider'; }
+      return;
+    }
+    if (data.user) {
+      window._currentUser = { ...data.user, firebaseUser: fb };
+      window._pendingFirebaseUser = null;
+      document.getElementById('usernameModal').classList.remove('show');
+      updateMenuForUser(data.user);
+      if (window.showNotif) window.showNotif('Bienvenue ' + val + ' ! 🎉', '#2ec05e');
+      refreshBadges();
+    } else {
+      errEl.textContent = 'Réponse inattendue du serveur, réessaie.';
+      if (btn) { btn.disabled = false; btn.textContent = '✅ Valider'; }
+    }
+  } catch(e) {
+    console.error('submitUsername error:', e);
+    errEl.textContent = 'Erreur réseau : ' + (e.message || 'réessaie dans un instant');
+    if (btn) { btn.disabled = false; btn.textContent = '✅ Valider'; }
   }
 };
 </script>
