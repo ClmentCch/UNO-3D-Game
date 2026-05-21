@@ -919,6 +919,7 @@ function showNotif(msg, color = 'rgba(255,255,255,.9)') {
   n.textContent = msg; n.style.color = color; n.classList.add('show');
   clearTimeout(n._t); n._t = setTimeout(() => n.classList.remove('show'), 2500);
 }
+window.showNotif = showNotif;
 
 function showWinner(winner) {
   document.getElementById('winnerText').textContent = winner === (window._currentUser?.username || '') || state.players.find(p => p.id === myId)?.name === winner ? '🏆 Tu as gagné !!' : '😞 ' + winner + ' a gagné';
