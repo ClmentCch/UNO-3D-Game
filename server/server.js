@@ -32,7 +32,7 @@ for (const method of ['get', 'post', 'put', 'delete']) {
 }
 
 app.use(cors({ origin: process.env.CORS_ORIGIN || '*', methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'] }));
-app.use(express.json());
+app.use(express.json({ limit: '1mb' }));
 
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: '*', methods: ['GET', 'POST'] } });
@@ -249,7 +249,11 @@ app.post('/api/users/update-profile', async (req, res) => {
     if (cleanDisplayName.length < 2) return res.status(400).json({ error: 'Nom invalide' });
     update.displayName = cleanDisplayName;
   }
-  if (photoURL !== undefined) update.photoURL = String(photoURL || '').trim().slice(0, 300000);
+  if (photoURL !== undefined) {
+    const cleanPhotoURL = String(photoURL || '').trim();
+    if (cleanPhotoURL.length > 300000) return res.status(413).json({ error: 'Image trop lourde' });
+    update.photoURL = cleanPhotoURL;
+  }
   await col.updateOne({ googleId }, { $set: update });
   const fresh = await col.findOne({ googleId });
   res.json({ user: publicUser(fresh, true) });
@@ -831,6 +835,7 @@ app.get('/', (req, res) => res.json({ ok: true, service: 'UNO 3D backend' }));
 app.use((err, req, res, next) => {
   console.error('Request error:', err);
   if (res.headersSent) return next(err);
+  if (err.type === 'entity.too.large') return res.status(413).json({ error: 'Image trop lourde' });
   res.status(500).json({ error: 'Internal server error' });
 });
 
