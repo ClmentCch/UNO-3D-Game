@@ -500,6 +500,19 @@ const API = 'https://uno-3d-backend.onrender.com';
 const SERVER_URL = API;
 const socket = io(SERVER_URL, { transports: ['websocket'] });
 
+async function apiFetch(path, options) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 45000);
+  try {
+    const r = await fetch(API + path, { ...(options || {}), signal: controller.signal });
+    const data = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(data.error || ('HTTP ' + r.status));
+    return data;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
 let myId = null, roomCode = null, state = null;
 let pendingWildCard = null;
 let pendingStackCards = null;
