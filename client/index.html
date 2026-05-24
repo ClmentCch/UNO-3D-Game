@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="UTF-8"/>
@@ -113,7 +113,7 @@ button:active{transform:scale(.96)!important}
 #opp-right{right:clamp(5px,2vw,20px);top:50%;transform:translateY(-50%);flex-direction:column}
 #opp-right .opp-card{margin:-10px 0;transform:rotate(90deg)}
 
-/* ── OVERLAY PANELS ── */
+/* â”€â”€ OVERLAY PANELS â”€â”€ */
 .overlay-panel{position:fixed;inset:0;z-index:150;background:rgba(0,0,0,.75);backdrop-filter:blur(12px);display:flex;justify-content:center;align-items:flex-start;padding:20px;overflow-y:auto;opacity:0;pointer-events:none;transition:opacity .3s}
 .overlay-panel.show{opacity:1;pointer-events:all}
 .panel-box{background:rgba(20,20,45,.95);border:1px solid rgba(255,255,255,.12);border-radius:20px;width:clamp(300px,90vw,520px);padding:clamp(16px,3vw,28px);display:flex;flex-direction:column;gap:14px;margin:auto}
@@ -178,19 +178,19 @@ button:active{transform:scale(.96)!important}
 <!-- USERNAME MODAL -->
 <div id="usernameModal">
   <div class="username-box">
-    <div style="font-size:48px">🎮</div>
+    <div style="font-size:48px">ðŸŽ®</div>
     <h2>Choisis ton pseudo</h2>
-    <p>Il sera lié à ton compte Google pour toujours.</p>
-    <input id="usernameInput" placeholder="Pseudo (2-20 caractères)" maxlength="20" style="width:100%;text-align:center;font-size:18px;font-weight:700;letter-spacing:1px"/>
+    <p>Il sera liÃ© Ã  ton compte Google pour toujours.</p>
+    <input id="usernameInput" placeholder="Pseudo (2-20 caractÃ¨res)" maxlength="20" style="width:100%;text-align:center;font-size:18px;font-weight:700;letter-spacing:1px"/>
     <div class="username-error" id="usernameError"></div>
-    <button class="btn-green" style="width:100%" onclick="submitUsername()">✅ Valider</button>
+    <button class="btn-green" style="width:100%" onclick="submitUsername()">âœ… Valider</button>
   </div>
 </div>
 
 <!-- MENU -->
 <div id="menuScreen" class="screen">
   <div class="logo">UNO</div>
-  <p style="color:rgba(255,255,255,.5);font-size:clamp(12px,2vw,15px);margin-bottom:12px;letter-spacing:2px">ÉDITION 3D</p>
+  <p style="color:rgba(255,255,255,.5);font-size:clamp(12px,2vw,15px);margin-bottom:12px;letter-spacing:2px">Ã‰DITION 3D</p>
   <div class="card-box">
     <div id="googleAuthBtn">
       <button class="btn-google" onclick="signInGoogle()" style="width:100%">
@@ -199,16 +199,17 @@ button:active{transform:scale(.96)!important}
       </button>
     </div>
     <div id="nameRow" style="display:flex;gap:8px;align-items:center">
-      <input id="nameInput" placeholder="Pseudo (anonyme par défaut)" maxlength="20" style="flex:1"/>
+      <input id="nameInput" placeholder="Pseudo (anonyme par dÃ©faut)" maxlength="20" style="flex:1"/>
     </div>
-    <button class="btn-red" onclick="startSolo()">🎮 Jouer contre les bots</button>
-    <button class="btn-blue" onclick="showCreate()">🏠 Créer une salle</button>
-    <button class="btn-green" onclick="showJoin()">🔗 Rejoindre une salle</button>
+    <button class="btn-red" onclick="startSolo()">ðŸŽ® Jouer contre les bots</button>
+    <button class="btn-blue" onclick="showCreate()">ðŸ  CrÃ©er une salle</button>
+    <button class="btn-green" onclick="showJoin()">ðŸ”— Rejoindre une salle</button>
   </div>
   <div class="menu-nav">
-    <button class="nav-btn" onclick="openFriends()">👥 Mes amis <span id="friendReqBadge" class="nav-badge" style="display:none">!</span></button>
-    <button class="nav-btn" onclick="openMessages()">💬 Messages <span id="msgBadge" class="nav-badge" style="display:none">!</span></button>
-    <button class="nav-btn" id="profileNavBtn" onclick="openOwnProfile()" style="display:none">👤 Mon profil</button>
+    <button class="nav-btn" onclick="openFriends()">ðŸ‘¥ Mes amis <span id="friendReqBadge" class="nav-badge" style="display:none">!</span></button>
+    <button class="nav-btn" onclick="openMessages()">ðŸ’¬ Messages <span id="msgBadge" class="nav-badge" style="display:none">!</span></button>
+    <button class="nav-btn" id="profileNavBtn" onclick="openOwnProfile()" style="display:none">ðŸ‘¤ Mon profil</button>
+    <button class="nav-btn" id="adminNavBtn" onclick="openAdminPanel()" style="display:none">Admin</button>
   </div>
 </div>
 
@@ -219,8 +220,8 @@ button:active{transform:scale(.96)!important}
     <p style="text-align:center;color:rgba(255,255,255,.5);font-size:13px">Partage ce code :</p>
     <div id="roomCode">----</div>
     <p style="text-align:center;color:rgba(255,255,255,.4);font-size:12px">En attente de joueurs...</p>
-    <button class="btn-green" onclick="startOnlineGame()">🚀 Démarrer la partie</button>
-    <button class="btn-ghost" onclick="backMenu()">← Retour</button>
+    <button class="btn-green" onclick="startOnlineGame()">ðŸš€ DÃ©marrer la partie</button>
+    <button class="btn-ghost" onclick="backMenu()">â† Retour</button>
   </div>
 </div>
 
@@ -229,8 +230,8 @@ button:active{transform:scale(.96)!important}
   <div class="logo" style="font-size:clamp(40px,8vw,70px);margin-bottom:20px">JOIN</div>
   <div class="card-box">
     <input id="joinCode" placeholder="Code de la salle" maxlength="4" style="text-align:center;font-size:clamp(20px,4vw,30px);font-weight:700;letter-spacing:8px"/>
-    <button class="btn-green" onclick="joinRoom()">✅ Rejoindre</button>
-    <button class="btn-ghost" onclick="backMenu()">← Retour</button>
+    <button class="btn-green" onclick="joinRoom()">âœ… Rejoindre</button>
+    <button class="btn-ghost" onclick="backMenu()">â† Retour</button>
   </div>
 </div>
 
@@ -238,6 +239,7 @@ button:active{transform:scale(.96)!important}
 <div id="gameUI" class="hidden">
   <div id="topBar">
     <div id="players"></div>
+        <button id="adminGameBtn" onclick="openAdminPanel()" style="display:none;background:rgba(245,200,0,.15);color:#f5c800;border:1px solid rgba(245,200,0,.35);padding:8px 14px;border-radius:20px;font-size:clamp(11px,1.6vw,14px);font-weight:800">Admin</button>
     <button id="drawBtn" onclick="drawCard()">+2 Piocher</button>
   </div>
   <div id="statusBar"><div id="status">En attente...</div></div>
@@ -257,20 +259,20 @@ button:active{transform:scale(.96)!important}
 
 <!-- COLOR PICKER -->
 <div id="colorPicker">
-  <h3>🎨 Choisir une couleur</h3>
+  <h3>ðŸŽ¨ Choisir une couleur</h3>
   <div class="color-grid">
-    <button class="color-btn c-red" onclick="pickColor('red')">🔴 Rouge</button>
-    <button class="color-btn c-blue" onclick="pickColor('blue')">🔵 Bleu</button>
-    <button class="color-btn c-green" onclick="pickColor('green')">🟢 Vert</button>
-    <button class="color-btn c-yellow" onclick="pickColor('yellow')">🟡 Jaune</button>
+    <button class="color-btn c-red" onclick="pickColor('red')">ðŸ”´ Rouge</button>
+    <button class="color-btn c-blue" onclick="pickColor('blue')">ðŸ”µ Bleu</button>
+    <button class="color-btn c-green" onclick="pickColor('green')">ðŸŸ¢ Vert</button>
+    <button class="color-btn c-yellow" onclick="pickColor('yellow')">ðŸŸ¡ Jaune</button>
   </div>
 </div>
 
 <!-- WINNER OVERLAY -->
 <div id="winnerOverlay">
-  <div class="winner-text" id="winnerText">🏆 Victoire !</div>
+  <div class="winner-text" id="winnerText">ðŸ† Victoire !</div>
   <div style="color:rgba(255,255,255,.6);font-size:clamp(14px,2.5vw,20px)" id="winnerSub"></div>
-  <button class="btn-red" style="margin-top:10px;min-width:180px" onclick="location.reload()">🔄 Rejouer</button>
+  <button class="btn-red" style="margin-top:10px;min-width:180px" onclick="location.reload()">ðŸ”„ Rejouer</button>
 </div>
 
 <!-- NOTIF -->
@@ -281,7 +283,7 @@ button:active{transform:scale(.96)!important}
   <div class="panel-box">
     <div class="panel-header">
       <span class="panel-title" id="profilePanelTitle">Profil</span>
-      <button class="close-btn" onclick="closePanel('profilePanel')">✕</button>
+      <button class="close-btn" onclick="closePanel('profilePanel')">âœ•</button>
     </div>
     <div id="profileContent"></div>
   </div>
@@ -291,8 +293,8 @@ button:active{transform:scale(.96)!important}
 <div id="friendsPanel" class="overlay-panel">
   <div class="panel-box">
     <div class="panel-header">
-      <span class="panel-title">👥 Mes amis</span>
-      <button class="close-btn" onclick="closePanel('friendsPanel')">✕</button>
+      <span class="panel-title">ðŸ‘¥ Mes amis</span>
+      <button class="close-btn" onclick="closePanel('friendsPanel')">âœ•</button>
     </div>
     <div id="friendsContent"></div>
   </div>
@@ -302,13 +304,47 @@ button:active{transform:scale(.96)!important}
 <div id="messagesPanel" class="overlay-panel">
   <div class="panel-box">
     <div class="panel-header">
-      <span class="panel-title" id="msgPanelTitle">💬 Messages</span>
-      <button class="close-btn" onclick="closeMsgPanel()">✕</button>
+      <span class="panel-title" id="msgPanelTitle">ðŸ’¬ Messages</span>
+      <button class="close-btn" onclick="closeMsgPanel()">âœ•</button>
     </div>
     <div id="messagesContent"></div>
   </div>
 </div>
 
+
+<!-- ADMIN PANEL -->
+<div id="adminPanel" class="overlay-panel">
+  <div class="panel-box" style="animation:winnerBounce .35s cubic-bezier(.34,1.56,.64,1)">
+    <div class="panel-header">
+      <span class="panel-title">Admin</span>
+      <button class="close-btn" onclick="closePanel('adminPanel')">x</button>
+    </div>
+    <div id="adminContent" style="display:flex;flex-direction:column;gap:12px">
+      <select id="adminTarget" style="padding:10px;border-radius:10px;background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.18)"></select>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <select id="adminColor" style="padding:10px;border-radius:10px;background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.18)">
+          <option value="red">Rouge</option><option value="blue">Bleu</option><option value="green">Vert</option><option value="yellow">Jaune</option><option value="wild">Wild</option>
+        </select>
+        <select id="adminValue" style="padding:10px;border-radius:10px;background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.18)">
+          <option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option>
+          <option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option>
+          <option value="skip">Interdit</option><option value="reverse">Inversement</option><option value="draw2">+2</option><option value="wild">Joker</option><option value="wild4">+4</option>
+        </select>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="mini-btn" style="background:linear-gradient(160deg,#45d975,#2ec05e);color:#fff" onclick="adminGiveCard()">Donner carte</button>
+        <button class="mini-btn" style="background:linear-gradient(160deg,#3a8de8,#2473cc);color:#fff" onclick="adminSetNextDraw()">Prochaine pioche</button>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <input id="adminXp" type="number" placeholder="XP" style="padding:10px;border-radius:10px;background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.18)"/>
+        <input id="adminLevels" type="number" placeholder="Niveaux" style="padding:10px;border-radius:10px;background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.18)"/>
+      </div>
+      <label style="display:flex;align-items:center;gap:8px;color:rgba(255,255,255,.8);font-size:13px"><input id="adminVerified" type="checkbox"/> Verifie</label>
+      <button class="mini-btn" style="background:linear-gradient(160deg,#ff4d6a,#e8304a);color:#fff" onclick="adminApplyUser()">Appliquer au profil</button>
+      <div id="adminStatus" style="min-height:18px;color:rgba(255,255,255,.6);font-size:12px"></div>
+    </div>
+  </div>
+</div>
 <!-- Firebase SDK -->
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
@@ -409,34 +445,34 @@ window.signOutGoogle = async function() {
   await signOut(window._auth);
   window._currentUser = null;
   updateMenuForAnon();
-  showNotif('Déconnecté', '#f5c800');
+  showNotif('DÃ©connectÃ©', '#f5c800');
 };
 
 window.submitUsername = async function() {
   const val = document.getElementById('usernameInput').value.trim();
   const errEl = document.getElementById('usernameError');
   errEl.textContent = '';
-  if (!val || val.length < 2 || val.length > 20) { errEl.textContent = 'Pseudo invalide (2-20 caractères)'; return; }
+  if (!val || val.length < 2 || val.length > 20) { errEl.textContent = 'Pseudo invalide (2-20 caractÃ¨res)'; return; }
   const btn = document.querySelector('#usernameModal .btn-green');
-  if (btn) { btn.disabled = true; btn.textContent = '⏳ Vérification...'; }
+  if (btn) { btn.disabled = true; btn.textContent = 'â³ VÃ©rification...'; }
   try {
     const chkData = await apiFetch('/api/users/check-username/' + encodeURIComponent(val));
     if (!chkData.available) {
-      errEl.textContent = chkData.reason || 'Ce pseudo est déjà pris !';
-      if (btn) { btn.disabled = false; btn.textContent = '✅ Valider'; }
+      errEl.textContent = chkData.reason || 'Ce pseudo est dÃ©jÃ  pris !';
+      if (btn) { btn.disabled = false; btn.textContent = 'âœ… Valider'; }
       return;
     }
     const fb = window._pendingFirebaseUser;
-    if (!fb) { errEl.textContent = 'Erreur : session expirée, reconnecte-toi.'; if (btn) { btn.disabled = false; btn.textContent = '✅ Valider'; } return; }
-    if (btn) btn.textContent = '⏳ Création...';
+    if (!fb) { errEl.textContent = 'Erreur : session expirÃ©e, reconnecte-toi.'; if (btn) { btn.disabled = false; btn.textContent = 'âœ… Valider'; } return; }
+    if (btn) btn.textContent = 'â³ CrÃ©ation...';
     const data = await apiFetch('/api/users/google-auth', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ googleId: fb.uid, email: fb.email, displayName: fb.displayName, photoURL: fb.photoURL, username: val })
     });
     if (data.usernameTaken) {
-      errEl.textContent = 'Ce pseudo est déjà pris !';
-      if (btn) { btn.disabled = false; btn.textContent = '✅ Valider'; }
+      errEl.textContent = 'Ce pseudo est dÃ©jÃ  pris !';
+      if (btn) { btn.disabled = false; btn.textContent = 'âœ… Valider'; }
       return;
     }
     if (data.user) {
@@ -444,16 +480,16 @@ window.submitUsername = async function() {
       window._pendingFirebaseUser = null;
       document.getElementById('usernameModal').classList.remove('show');
       updateMenuForUser(data.user);
-      if (window.showNotif) window.showNotif('Bienvenue ' + val + ' ! 🎉', '#2ec05e');
+      if (window.showNotif) window.showNotif('Bienvenue ' + val + ' ! ðŸŽ‰', '#2ec05e');
       refreshBadges();
     } else {
-      errEl.textContent = 'Réponse inattendue du serveur, réessaie.';
-      if (btn) { btn.disabled = false; btn.textContent = '✅ Valider'; }
+      errEl.textContent = 'RÃ©ponse inattendue du serveur, rÃ©essaie.';
+      if (btn) { btn.disabled = false; btn.textContent = 'âœ… Valider'; }
     }
   } catch(e) {
     console.error('submitUsername error:', e);
-    errEl.textContent = 'Erreur réseau : ' + (e.message || 'réessaie dans un instant');
-    if (btn) { btn.disabled = false; btn.textContent = '✅ Valider'; }
+    errEl.textContent = 'Erreur rÃ©seau : ' + (e.message || 'rÃ©essaie dans un instant');
+    if (btn) { btn.disabled = false; btn.textContent = 'âœ… Valider'; }
   }
 };
 </script>
@@ -466,8 +502,10 @@ const socket = io(SERVER_URL, { transports: ['websocket'] });
 
 let myId = null, roomCode = null, state = null;
 let pendingWildCard = null;
+let pendingStackCards = null;
 let currentMsgFriend = null;
 let msgPollInterval = null;
+let lastActionSeen = null;
 
 socket.on('connect', () => { myId = socket.id; });
 socket.on('roomCreated', data => {
@@ -478,6 +516,10 @@ socket.on('roomCreated', data => {
 socket.on('roomJoined', data => { roomCode = data.code; hideAll(); show('gameUI'); });
 socket.on('gameState', gs => {
   state = gs;
+  if (gs.lastAction && gs.lastAction !== lastActionSeen) {
+    lastActionSeen = gs.lastAction;
+    showNotif(gs.lastAction, '#f5c800');
+  }
   if (gs.phase === 'playing') { hideAll(); show('gameUI'); renderGame(); }
   if (gs.phase === 'over') { showWinner(gs.winner); saveGameResult(gs); }
 });
@@ -490,7 +532,7 @@ function show(id) { document.getElementById(id).classList.remove('hidden'); }
 function backMenu() { hideAll(); show('menuScreen'); }
 
 function getPlayerName() {
-  if (window._currentUser) return window._currentUser.username;
+  if (window._currentUser) return window._currentUser.displayName || window._currentUser.username;
   const n = document.getElementById('nameInput').value.trim();
   if (n) return n;
   // Generate anonymous
@@ -499,20 +541,41 @@ function getPlayerName() {
   return anon;
 }
 
+function isAdminCurrentUser() {
+  return window._currentUser &&
+    String(window._currentUser.email || '').toLowerCase() === 'clementcochie@gmail.com' &&
+    String(window._currentUser.username || '').toLowerCase() === 'clmentcch';
+}
+
+function levelBadge(level) {
+  return `<span style="color:#f5c800;font-size:11px;font-weight:900;border:1px solid rgba(245,200,0,.35);border-radius:999px;padding:1px 6px">Niv.${Number(level || 1)}</span>`;
+}
+
+function playerPayload(name) {
+  const u = window._currentUser;
+  return {
+    name,
+    username: u?.username || name,
+    googleId: u?.googleId || null,
+    level: u?.level || 1,
+    verified: Boolean(u?.verified)
+  };
+}
+
 function startSolo() {
   const name = getPlayerName();
-  socket.emit('createRoom', { name, botCount: 3 });
+  socket.emit('createRoom', { ...playerPayload(name), botCount: 3 });
   setTimeout(() => socket.emit('startGame', { code: roomCode }), 1000);
 }
 function showCreate() {
   const name = getPlayerName();
-  socket.emit('createRoom', { name, botCount: 0 });
+  socket.emit('createRoom', { ...playerPayload(name), botCount: 0 });
 }
 function showJoin() { hideAll(); show('joinScreen'); }
 function joinRoom() {
   const name = getPlayerName();
   const code = document.getElementById('joinCode').value.toUpperCase();
-  socket.emit('joinRoom', { code, name });
+  socket.emit('joinRoom', { code, ...playerPayload(name) });
 }
 function startOnlineGame() { socket.emit('startGame', { code: roomCode }); }
 
@@ -524,20 +587,23 @@ function updateMenuForAnon() {
     </button>`;
   document.getElementById('nameRow').style.display = 'flex';
   document.getElementById('profileNavBtn').style.display = 'none';
+  document.getElementById('adminNavBtn').style.display = 'none';
+  document.getElementById('adminGameBtn').style.display = 'none';
 }
 
 function updateMenuForUser(user) {
   const photo = user.photoURL
     ? `<img src="${user.photoURL}" style="width:22px;height:22px;border-radius:50%">`
-    : `<span style="font-size:18px">👤</span>`;
+    : `<span style="font-size:18px">ðŸ‘¤</span>`;
   document.getElementById('googleAuthBtn').innerHTML = `
     <div class="google-connected">
       ${photo}
-      <span>Connecté en tant que <b>${user.username}</b>${user.verified ? ' ✓' : ''}</span>
-      <button onclick="signOutGoogle()" style="background:rgba(255,255,255,.1);border:none;color:rgba(255,255,255,.6);border-radius:8px;padding:3px 8px;font-size:11px;cursor:pointer;margin-left:auto">Déco</button>
+      <span>Connecte en tant que <b>${user.displayName || user.username}</b> ${levelBadge(user.level)} <small style="opacity:.65">@${user.username}</small>${user.verified ? ' âœ“' : ''}</span>
+      <button onclick="signOutGoogle()" style="background:rgba(255,255,255,.1);border:none;color:rgba(255,255,255,.6);border-radius:8px;padding:3px 8px;font-size:11px;cursor:pointer;margin-left:auto">DÃ©co</button>
     </div>`;
   document.getElementById('nameRow').style.display = 'none';
   document.getElementById('profileNavBtn').style.display = 'flex';
+  document.getElementById('adminNavBtn').style.display = isAdminCurrentUser() ? 'flex' : 'none';
 }
 
 function showUsernameModal() {
@@ -545,7 +611,7 @@ function showUsernameModal() {
   document.getElementById('usernameInput').focus();
 }
 
-// ── PROFILE ──────────────────────────────────────────────────────────────────
+// â”€â”€ PROFILE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function openOwnProfile() {
   if (!window._currentUser) return;
   openProfile(window._currentUser.username);
@@ -556,57 +622,42 @@ async function openProfile(username) {
   document.getElementById('profilePanelTitle').textContent = 'Profil';
   document.getElementById('profileContent').innerHTML = '<div style="text-align:center;padding:20px;color:rgba(255,255,255,.5)">Chargement...</div>';
   try {
-    const r = await fetch(API + '/api/users/profile/' + encodeURIComponent(username));
-    if (!r.ok) { document.getElementById('profileContent').innerHTML = '<p style="color:#e8304a">Profil introuvable</p>'; return; }
-    const user = await r.json();
-    const isMe = window._currentUser && window._currentUser.username === username;
+    const user = await apiFetch('/api/users/profile/' + encodeURIComponent(username));
+    const isMe = window._currentUser && window._currentUser.username === user.username;
     const isLoggedIn = !!window._currentUser;
-    const isFollowing = isLoggedIn && (window._currentUser.following || []).includes(username);
-    const isFriend = isLoggedIn && (window._currentUser.friends || []).includes(username);
-    const alreadyRequested = false; // could check
-
-    const photo = user.photoURL
-      ? `<img src="${user.photoURL}" class="profile-avatar">`
-      : `<div class="profile-avatar-default">${username[0].toUpperCase()}</div>`;
-
-    const followBtn = !isMe && isLoggedIn ? `
-      <button class="mini-btn" style="background:${isFollowing ? 'rgba(255,255,255,.1)' : 'linear-gradient(160deg,#3a8de8,#2473cc)'};color:#fff"
-        onclick="toggleFollow('${username}', ${isFollowing})">
-        ${isFollowing ? '✓ Suivi' : '+ Suivre'}
-      </button>` : '';
-    const friendBtn = !isMe && isLoggedIn && !isFriend ? `
-      <button class="mini-btn" style="background:linear-gradient(160deg,#45d975,#2ec05e);color:#fff"
-        onclick="sendFriendRequest('${username}')">
-        👥 Ajouter
-      </button>` : isFriend ? `<span style="color:#2ec05e;font-size:12px;font-weight:700">✓ Amis</span>` : '';
-
+    const isFollowing = isLoggedIn && (window._currentUser.following || []).includes(user.username);
+    const isFriend = isLoggedIn && (window._currentUser.friends || []).includes(user.username);
+    const photo = user.photoURL ? `<img src="${escHtml(user.photoURL)}" class="profile-avatar">` : `<div class="profile-avatar-default">${escHtml((user.displayName || user.username || '?')[0].toUpperCase())}</div>`;
+    const followBtn = !isMe && isLoggedIn ? `<button class="mini-btn" style="background:${isFollowing ? 'rgba(255,255,255,.1)' : 'linear-gradient(160deg,#3a8de8,#2473cc)'};color:#fff" onclick="toggleFollow('${escHtml(user.username)}', ${isFollowing})">${isFollowing ? 'Suivi' : '+ Suivre'}</button>` : '';
+    const friendBtn = !isMe && isLoggedIn && !isFriend ? `<button class="mini-btn" style="background:linear-gradient(160deg,#45d975,#2ec05e);color:#fff" onclick="sendFriendRequest('${escHtml(user.username)}')">Ajouter</button>` : isFriend ? `<span style="color:#2ec05e;font-size:12px;font-weight:700">Amis</span>` : '';
+    const editBox = isMe ? `<div style="border-top:1px solid rgba(255,255,255,.08);padding-top:14px;display:flex;flex-direction:column;gap:8px"><div style="font-size:13px;font-weight:700;color:rgba(255,255,255,.5);letter-spacing:.5px">MODIFIER LE PROFIL</div><input id="profileDisplayName" value="${escHtml(user.displayName || user.username)}" maxlength="24" placeholder="Nom d'affichage"/><input id="profilePhotoURL" value="${escHtml(user.photoURL || '')}" placeholder="URL image de profil"/><input type="file" accept="image/*" onchange="profileFileToDataUrl(this)"/><button class="mini-btn" style="background:linear-gradient(160deg,#45d975,#2ec05e);color:#fff" onclick="updateOwnProfile()">Enregistrer</button></div>` : '';
     const games = (user.recentGames || []).slice(0, 5);
-    const gamesHtml = games.length ? games.map(g => `
-      <div class="game-item">
-        <div>
-          <div style="font-size:13px;font-weight:700">${g.players ? g.players.join(', ') : 'Partie'}</div>
-          <div class="game-date">${g.date ? new Date(g.date).toLocaleDateString('fr-FR') : ''}</div>
-        </div>
-        <span class="${g.winner === username ? 'result-win' : 'result-lose'}">${g.winner === username ? '🏆 Victoire' : '💀 Défaite'}</span>
-      </div>`).join('') : '<p style="color:rgba(255,255,255,.4);font-size:13px;text-align:center">Aucune partie récente</p>';
+    const gamesHtml = games.length ? games.map(g => `<div class="game-item"><div><div style="font-size:13px;font-weight:700">${g.players ? g.players.map(escHtml).join(', ') : 'Partie'}</div><div class="game-date">${g.date ? new Date(g.date).toLocaleDateString('fr-FR') : ''}</div></div><span class="${g.winnerUsername === user.username || g.winner === user.username || g.winner === user.displayName ? 'result-win' : 'result-lose'}">${g.winnerUsername === user.username || g.winner === user.username || g.winner === user.displayName ? 'Victoire' : 'Defaite'}</span></div>`).join('') : '<p style="color:rgba(255,255,255,.4);font-size:13px;text-align:center">Aucune partie recente</p>';
+    document.getElementById('profileContent').innerHTML = `<div style="display:flex;align-items:center;gap:16px;margin-bottom:16px">${photo}<div style="flex:1"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span style="font-size:clamp(16px,3vw,22px);font-weight:900">${escHtml(user.displayName || user.username)}</span>${levelBadge(user.level)}${user.verified ? '<span class="verified-badge">✓ Verifie</span>' : ''}</div><div style="color:rgba(255,255,255,.5);font-size:12px;margin-top:2px">@${escHtml(user.username)} · ${Number(user.xp || 0)} XP · ${Number(user.gamesPlayed || 0)} parties · ${Number(user.wins || 0)} victoires</div><div style="color:rgba(255,255,255,.5);font-size:12px;margin-top:2px">${user.followers ? user.followers.length : 0} abonnes · ${user.following ? user.following.length : 0} abonnements</div><div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">${followBtn}${friendBtn}</div></div></div>${editBox}<div style="border-top:1px solid rgba(255,255,255,.08);padding-top:14px;margin-top:14px"><div style="font-size:13px;font-weight:700;color:rgba(255,255,255,.5);margin-bottom:10px;letter-spacing:.5px">PARTIES RECENTES</div><div style="display:flex;flex-direction:column;gap:8px">${gamesHtml}</div></div>`;
+  } catch(e) {
+    console.error(e);
+    document.getElementById('profileContent').innerHTML = '<p style="color:#e8304a">Erreur de chargement</p>';
+  }
+}
 
-    document.getElementById('profileContent').innerHTML = `
-      <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px">
-        ${photo}
-        <div style="flex:1">
-          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-            <span style="font-size:clamp(16px,3vw,22px);font-weight:900">${user.username}</span>
-            ${user.verified ? '<span class="verified-badge">✓ Vérifié</span>' : ''}
-          </div>
-          <div style="color:rgba(255,255,255,.5);font-size:12px;margin-top:2px">${user.followers ? user.followers.length : 0} abonnés · ${user.following ? user.following.length : 0} abonnements</div>
-          <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">${followBtn}${friendBtn}</div>
-        </div>
-      </div>
-      <div style="border-top:1px solid rgba(255,255,255,.08);padding-top:14px">
-        <div style="font-size:13px;font-weight:700;color:rgba(255,255,255,.5);margin-bottom:10px;letter-spacing:.5px">PARTIES RÉCENTES</div>
-        <div style="display:flex;flex-direction:column;gap:8px">${gamesHtml}</div>
-      </div>`;
-  } catch(e) { document.getElementById('profileContent').innerHTML = '<p style="color:#e8304a">Erreur de chargement</p>'; }
+async function updateOwnProfile() {
+  if (!window._currentUser) return;
+  try {
+    const data = await apiFetch('/api/users/update-profile', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ googleId: window._currentUser.googleId, displayName: document.getElementById('profileDisplayName').value.trim(), photoURL: document.getElementById('profilePhotoURL').value.trim() }) });
+    window._currentUser = { ...window._currentUser, ...data.user };
+    updateMenuForUser(window._currentUser);
+    openProfile(window._currentUser.username);
+    showNotif('Profil mis a jour', '#2ec05e');
+  } catch(e) { showNotif(e.message || 'Erreur profil', '#e8304a'); }
+}
+
+function profileFileToDataUrl(input) {
+  const file = input.files && input.files[0];
+  if (!file) return;
+  if (file.size > 250000) return showNotif('Image trop lourde', '#e8304a');
+  const reader = new FileReader();
+  reader.onload = () => { document.getElementById('profilePhotoURL').value = reader.result; };
+  reader.readAsDataURL(file);
 }
 
 async function toggleFollow(username, isFollowing) {
@@ -620,7 +671,7 @@ async function toggleFollow(username, isFollowing) {
     window._currentUser.following = [...(window._currentUser.following || []), username];
   }
   openProfile(username);
-  showNotif(isFollowing ? 'Abonnement annulé' : 'Abonné à ' + username + ' !', '#2ec05e');
+  showNotif(isFollowing ? 'Abonnement annulÃ©' : 'AbonnÃ© Ã  ' + username + ' !', '#2ec05e');
 }
 
 async function sendFriendRequest(username) {
@@ -628,12 +679,12 @@ async function sendFriendRequest(username) {
   const r = await fetch(API + '/api/friends/request', { method: 'POST', headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ googleId: window._currentUser.googleId, targetUsername: username }) });
   const data = await r.json();
-  if (data.alreadyFriends) { showNotif('Vous êtes déjà amis !', '#f5c800'); return; }
-  showNotif('Demande envoyée à ' + username + ' !', '#2ec05e');
+  if (data.alreadyFriends) { showNotif('Vous Ãªtes dÃ©jÃ  amis !', '#f5c800'); return; }
+  showNotif('Demande envoyÃ©e Ã  ' + username + ' !', '#2ec05e');
   openProfile(username);
 }
 
-// ── FRIENDS ──────────────────────────────────────────────────────────────────
+// â”€â”€ FRIENDS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function openFriends() {
   if (!window._currentUser) { showNotif('Connecte-toi avec Google pour voir tes amis !', '#f5c800'); return; }
   document.getElementById('friendsPanel').classList.add('show');
@@ -648,13 +699,13 @@ async function openFriends() {
         <div style="font-size:12px;font-weight:700;color:rgba(255,255,255,.4);margin-bottom:8px;letter-spacing:.5px">DEMANDES EN ATTENTE</div>
         ${requests.map(req => `
           <div class="req-item">
-            <span style="font-size:20px">👋</span>
+            <span style="font-size:20px">ðŸ‘‹</span>
             <div style="flex:1">
               <div style="font-weight:700;cursor:pointer;text-decoration:underline" onclick="closePanel('friendsPanel');openProfile('${req.from}')">${req.from}</div>
               <div style="font-size:11px;color:rgba(255,255,255,.4)">${new Date(req.date).toLocaleDateString('fr-FR')}</div>
             </div>
-            <button class="mini-btn" style="background:linear-gradient(160deg,#45d975,#2ec05e);color:#fff" onclick="acceptFriend('${req.from}')">✓</button>
-            <button class="mini-btn" style="background:rgba(255,0,0,.2);color:#e8304a;border:1px solid rgba(232,48,74,.3)" onclick="declineFriend('${req.from}')">✕</button>
+            <button class="mini-btn" style="background:linear-gradient(160deg,#45d975,#2ec05e);color:#fff" onclick="acceptFriend('${req.from}')">âœ“</button>
+            <button class="mini-btn" style="background:rgba(255,0,0,.2);color:#e8304a;border:1px solid rgba(232,48,74,.3)" onclick="declineFriend('${req.from}')">âœ•</button>
           </div>`).join('')}
       </div>` : '';
 
@@ -662,10 +713,10 @@ async function openFriends() {
       <div class="friend-item">
         <div class="friend-avatar">${f.username[0].toUpperCase()}</div>
         <div style="flex:1">
-          <div class="friend-name" style="cursor:pointer;text-decoration:underline" onclick="closePanel('friendsPanel');openProfile('${f.username}')">${f.username}${f.verified ? ' ✓' : ''}</div>
+          <div class="friend-name" style="cursor:pointer;text-decoration:underline" onclick="closePanel('friendsPanel');openProfile('${f.username}')">${f.username}${f.verified ? ' âœ“' : ''}</div>
         </div>
         <div class="friend-actions">
-          <button class="mini-btn" style="background:linear-gradient(160deg,#3a8de8,#2473cc);color:#fff" onclick="openChat('${f.username}')">💬</button>
+          <button class="mini-btn" style="background:linear-gradient(160deg,#3a8de8,#2473cc);color:#fff" onclick="openChat('${f.username}')">ðŸ’¬</button>
         </div>
       </div>`).join('') : '<p style="color:rgba(255,255,255,.4);font-size:13px;text-align:center;padding:10px">Aucun ami pour l\'instant</p>';
 
@@ -679,7 +730,7 @@ async function acceptFriend(fromUsername) {
   await fetch(API + '/api/friends/accept', { method: 'POST', headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ googleId: window._currentUser.googleId, fromUsername }) });
   window._currentUser.friends = [...(window._currentUser.friends || []), fromUsername];
-  showNotif(fromUsername + ' est maintenant ton ami ! 🎉', '#2ec05e');
+  showNotif(fromUsername + ' est maintenant ton ami ! ðŸŽ‰', '#2ec05e');
   openFriends(); refreshBadges();
 }
 
@@ -690,11 +741,11 @@ async function declineFriend(fromUsername) {
   openFriends(); refreshBadges();
 }
 
-// ── MESSAGES ─────────────────────────────────────────────────────────────────
+// â”€â”€ MESSAGES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function openMessages() {
   if (!window._currentUser) { showNotif('Connecte-toi avec Google pour envoyer des messages !', '#f5c800'); return; }
   currentMsgFriend = null;
-  document.getElementById('msgPanelTitle').textContent = '💬 Messages';
+  document.getElementById('msgPanelTitle').textContent = 'ðŸ’¬ Messages';
   document.getElementById('messagesPanel').classList.add('show');
   // Show friend list to choose
   const r = await fetch(API + '/api/friends/' + window._currentUser.googleId);
@@ -704,7 +755,7 @@ async function openMessages() {
   const unread = unreadData.unread || {};
   const friends = data.friends || [];
   if (!friends.length) {
-    document.getElementById('messagesContent').innerHTML = '<p style="color:rgba(255,255,255,.4);font-size:13px;text-align:center;padding:20px">Ajoute des amis pour leur écrire !</p>';
+    document.getElementById('messagesContent').innerHTML = '<p style="color:rgba(255,255,255,.4);font-size:13px;text-align:center;padding:20px">Ajoute des amis pour leur Ã©crire !</p>';
     return;
   }
   document.getElementById('messagesContent').innerHTML = `
@@ -722,7 +773,7 @@ async function openMessages() {
 async function openChat(friendUsername) {
   closePanel('friendsPanel');
   currentMsgFriend = friendUsername;
-  document.getElementById('msgPanelTitle').textContent = '💬 ' + friendUsername;
+  document.getElementById('msgPanelTitle').textContent = 'ðŸ’¬ ' + friendUsername;
   document.getElementById('messagesPanel').classList.add('show');
   await loadMessages(friendUsername);
   if (msgPollInterval) clearInterval(msgPollInterval);
@@ -733,6 +784,9 @@ async function loadMessages(friendUsername, silent = false) {
   if (!window._currentUser) return;
   if (!silent) document.getElementById('messagesContent').innerHTML = '<div style="text-align:center;padding:10px;color:rgba(255,255,255,.4)">Chargement...</div>';
   try {
+    const existingInput = document.getElementById('msgInput');
+    const draft = existingInput ? existingInput.value : '';
+    const keepFocus = document.activeElement === existingInput;
     const r = await fetch(API + '/api/messages/' + window._currentUser.googleId + '/' + encodeURIComponent(friendUsername));
     const msgs = await r.json();
     const me = window._currentUser.username;
@@ -747,8 +801,16 @@ async function loadMessages(friendUsername, silent = false) {
       <div class="msg-list" id="msgList">${msgsHtml || '<p style="color:rgba(255,255,255,.4);font-size:13px;text-align:center;padding:20px">Commence la conversation !</p>'}</div>
       <div class="msg-input-row" style="margin-top:10px">
         <input id="msgInput" placeholder="Ton message..." maxlength="500" onkeydown="if(event.key==='Enter')sendMessage()"/>
-        <button class="msg-send-btn" onclick="sendMessage()">➤</button>
+        <button class="msg-send-btn" onclick="sendMessage()">âž¤</button>
       </div>`;
+    const newInput = document.getElementById('msgInput');
+    if (newInput && draft) {
+      newInput.value = draft;
+      if (keepFocus) {
+        newInput.focus();
+        newInput.setSelectionRange(draft.length, draft.length);
+      }
+    }
     const list = document.getElementById('msgList');
     if (list) list.scrollTop = list.scrollHeight;
   } catch(e) {}
@@ -792,6 +854,91 @@ setInterval(() => { if (window._currentUser) refreshBadges(); }, 15000);
 
 function closePanel(id) { document.getElementById(id).classList.remove('show'); }
 
+function openAdminPanel() {
+  if (!isAdminCurrentUser()) return showNotif('Admin uniquement', '#e8304a');
+  const panel = document.getElementById('adminPanel');
+  const target = document.getElementById('adminTarget');
+  const players = state?.players?.filter(p => !p.isBot) || [];
+  target.innerHTML = '';
+  if (players.length) {
+    players.forEach(p => {
+      const opt = document.createElement('option');
+      opt.value = p.id;
+      opt.dataset.username = p.username;
+      opt.dataset.verified = p.verified ? '1' : '0';
+      opt.textContent = `${p.name} (@${p.username})`;
+      target.appendChild(opt);
+    });
+  } else if (window._currentUser) {
+    const opt = document.createElement('option');
+    opt.value = '';
+    opt.dataset.username = window._currentUser.username;
+    opt.dataset.verified = window._currentUser.verified ? '1' : '0';
+    opt.textContent = `${window._currentUser.displayName || window._currentUser.username} (@${window._currentUser.username})`;
+    target.appendChild(opt);
+  }
+  document.getElementById('adminVerified').checked = target.options[target.selectedIndex]?.dataset.verified === '1';
+  target.onchange = () => {
+    document.getElementById('adminVerified').checked = target.options[target.selectedIndex]?.dataset.verified === '1';
+  };
+  document.getElementById('adminStatus').textContent = '';
+  panel.classList.add('show');
+}
+
+function adminCardChoice() {
+  const value = document.getElementById('adminValue').value;
+  let color = document.getElementById('adminColor').value;
+  if (value === 'wild' || value === 'wild4') color = 'wild';
+  return { color, value };
+}
+
+function adminTargetInfo() {
+  const sel = document.getElementById('adminTarget');
+  const opt = sel.options[sel.selectedIndex];
+  return { id: sel.value, username: opt?.dataset.username || window._currentUser?.username };
+}
+
+function adminSetStatus(msg, ok = true) {
+  const el = document.getElementById('adminStatus');
+  el.textContent = msg;
+  el.style.color = ok ? '#2ec05e' : '#e8304a';
+}
+
+function adminGiveCard() {
+  if (!state || !roomCode) return adminSetStatus('Lance une partie pour donner une carte.', false);
+  const target = adminTargetInfo();
+  socket.emit('adminGiveCard', { code: roomCode, adminGoogleId: window._currentUser.googleId, targetId: target.id, ...adminCardChoice() });
+  adminSetStatus('Carte donnee.');
+}
+
+function adminSetNextDraw() {
+  if (!state || !roomCode) return adminSetStatus('Lance une partie pour modifier la pioche.', false);
+  socket.emit('adminSetNextDraw', { code: roomCode, adminGoogleId: window._currentUser.googleId, ...adminCardChoice() });
+  adminSetStatus('Prochaine pioche modifiee.');
+}
+
+async function adminApplyUser() {
+  const target = adminTargetInfo();
+  try {
+    const data = await apiFetch('/api/admin/user', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        googleId: window._currentUser.googleId,
+        targetUsername: target.username,
+        xp: Number(document.getElementById('adminXp').value || 0),
+        levels: Number(document.getElementById('adminLevels').value || 0),
+        verified: document.getElementById('adminVerified').checked
+      })
+    });
+    if (data.user?.username === window._currentUser.username) {
+      window._currentUser = { ...window._currentUser, ...data.user };
+      updateMenuForUser(window._currentUser);
+    }
+    adminSetStatus('Profil admin mis a jour.');
+  } catch(e) { adminSetStatus(e.message || 'Erreur admin', false); }
+}
+
 function escHtml(s) {
   return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
@@ -802,15 +949,15 @@ async function saveGameResult(gs) {
     await fetch(API + '/api/users/game-result', { method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         googleId: window._currentUser.googleId,
-        result: { players: gs.players.map(p => p.name), winner: gs.winner, roomCode: gs.code }
+        result: { players: gs.players.map(p => p.name), winner: gs.winner, winnerUsername: gs.winnerUsername, roomCode: gs.code }
       }) });
     // refresh local user
     const r = await fetch(API + '/api/users/by-google/' + window._currentUser.googleId);
-    if (r.ok) { const u = await r.json(); window._currentUser = { ...window._currentUser, ...u }; }
+    if (r.ok) { const u = await r.json(); window._currentUser = { ...window._currentUser, ...u }; updateMenuForUser(window._currentUser); }
   } catch(e) {}
 }
 
-// ── GAME RENDER ───────────────────────────────────────────────────────────────
+// â”€â”€ GAME RENDER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function renderGame() {
   const me = state.players.find(p => p.id === myId);
   if (!me) return;
@@ -818,9 +965,10 @@ function renderGame() {
   const myIndex = state.players.findIndex(p => p.id === myId);
   const isMyTurn = state.currentTurn === myIndex;
   const statusEl = document.getElementById('status');
-  statusEl.textContent = isMyTurn ? '🎯 TON TOUR !' : '⏳ Tour adverse';
+  statusEl.textContent = isMyTurn ? 'ðŸŽ¯ TON TOUR !' : 'â³ Tour adverse';
   statusEl.className = isMyTurn ? 'my-turn' : '';
   document.getElementById('drawBtn').style.opacity = isMyTurn ? '1' : '0.5';
+  document.getElementById('adminGameBtn').style.display = isAdminCurrentUser() ? 'inline-flex' : 'none';
   if (me.hand.length === 1) showUnoBadge();
 }
 
@@ -829,9 +977,10 @@ function renderPlayers() {
   state.players.forEach((p, i) => {
     const el = document.createElement('div');
     el.className = 'player' + (state.currentTurn === i ? ' active' : '');
-    const canClick = p.name !== '🤖 Aria' && p.name !== '🤖 Neo' && p.name !== '🤖 Orion';
+    const canClick = !p.isBot && p.username;
     el.innerHTML = `<span class="dot"></span><span style="${canClick ? 'cursor:pointer;text-decoration:underline' : ''}"
-      ${canClick ? `onclick="openProfile('${p.name}')"` : ''}>${p.name}</span>
+      ${canClick ? `onclick="openProfile('${p.username}')"` : ''}>${p.name}</span>${levelBadge(p.level)}
+      ${p.verified ? '<span style="color:#60a0f0;font-size:11px;font-weight:800">✓</span>' : ''}
       <span style="opacity:.6">(${p.handCount})</span>`;
     div.appendChild(el);
   });
@@ -881,9 +1030,19 @@ function renderOpponents() {
 function playCard(card, el) {
   const myIndex = state.players.findIndex(p => p.id === myId);
   if (state.currentTurn !== myIndex) { showNotif("Ce n'est pas ton tour !", '#f5c800'); return; }
+  const me = state.players.find(p => p.id === myId);
+  const stack = (me?.hand || []).filter(c => c.value === card.value);
+  const selected = stack.length > 1 && confirm(`Empiler ${stack.length} cartes ${getLabel(card.value)} ?`)
+    ? stack
+    : [card];
   if (card.value === 'wild' || card.value === 'wild4') {
     pendingWildCard = card;
+    pendingStackCards = selected.length > 1 ? selected : null;
     document.getElementById('colorPicker').classList.add('show');
+    return;
+  }
+  if (selected.length > 1) {
+    socket.emit('playCards', { code: roomCode, cardIds: selected.map(c => c.id), chosenColor: null });
     return;
   }
   socket.emit('playCard', { code: roomCode, cardId: card.id, chosenColor: null });
@@ -893,16 +1052,21 @@ function pickColor(color) {
   document.getElementById('colorPicker').classList.remove('show');
   if (!pendingWildCard) return;
   const card = pendingWildCard; pendingWildCard = null;
+  if (pendingStackCards) {
+    const cards = pendingStackCards; pendingStackCards = null;
+    socket.emit('playCards', { code: roomCode, cardIds: cards.map(c => c.id), chosenColor: color });
+    return;
+  }
   socket.emit('playCard', { code: roomCode, cardId: card.id, chosenColor: color });
 }
 
 function drawCard() { socket.emit('drawCard', { code: roomCode }); }
 
 function getLabel(v) {
-  if (v === 'skip') return '⊘';
-  if (v === 'reverse') return '↺';
+  if (v === 'skip') return 'âŠ˜';
+  if (v === 'reverse') return 'â†º';
   if (v === 'draw2') return '+2';
-  if (v === 'wild') return '★';
+  if (v === 'wild') return 'â˜…';
   if (v === 'wild4') return '+4';
   return v;
 }
@@ -922,14 +1086,14 @@ function showNotif(msg, color = 'rgba(255,255,255,.9)') {
 window.showNotif = showNotif;
 
 function showWinner(winner) {
-  document.getElementById('winnerText').textContent = winner === (window._currentUser?.username || '') || state.players.find(p => p.id === myId)?.name === winner ? '🏆 Tu as gagné !!' : '😞 ' + winner + ' a gagné';
+  document.getElementById('winnerText').textContent = winner === (window._currentUser?.username || '') || state.players.find(p => p.id === myId)?.name === winner ? 'ðŸ† Tu as gagnÃ© !!' : 'ðŸ˜ž ' + winner + ' a gagnÃ©';
   document.getElementById('winnerSub').textContent = ''; 
   document.getElementById('winnerOverlay').classList.add('show');
   if (state.players.find(p => p.id === myId)?.name === winner) launchConfetti();
 }
 
 function launchConfetti() {
-  const emojis = ['🎉', '🎊', '⭐', '🌟', '✨', '🎈', '🎀'];
+  const emojis = ['ðŸŽ‰', 'ðŸŽŠ', 'â­', 'ðŸŒŸ', 'âœ¨', 'ðŸŽˆ', 'ðŸŽ€'];
   for (let i = 0; i < 20; i++) {
     const el = document.createElement('div'); el.className = 'confetti';
     el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
