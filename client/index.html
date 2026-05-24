@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="UTF-8"/>
@@ -113,7 +113,7 @@ button:active{transform:scale(.96)!important}
 #opp-right{right:clamp(5px,2vw,20px);top:50%;transform:translateY(-50%);flex-direction:column}
 #opp-right .opp-card{margin:-10px 0;transform:rotate(90deg)}
 
-/* â”€â”€ OVERLAY PANELS â”€â”€ */
+/* ── OVERLAY PANELS ── */
 .overlay-panel{position:fixed;inset:0;z-index:150;background:rgba(0,0,0,.75);backdrop-filter:blur(12px);display:flex;justify-content:center;align-items:flex-start;padding:20px;overflow-y:auto;opacity:0;pointer-events:none;transition:opacity .3s}
 .overlay-panel.show{opacity:1;pointer-events:all}
 .panel-box{background:rgba(20,20,45,.95);border:1px solid rgba(255,255,255,.12);border-radius:20px;width:clamp(300px,90vw,520px);padding:clamp(16px,3vw,28px);display:flex;flex-direction:column;gap:14px;margin:auto}
@@ -178,19 +178,19 @@ button:active{transform:scale(.96)!important}
 <!-- USERNAME MODAL -->
 <div id="usernameModal">
   <div class="username-box">
-    <div style="font-size:48px">ðŸŽ®</div>
+    <div style="font-size:48px">🎮</div>
     <h2>Choisis ton pseudo</h2>
-    <p>Il sera liÃ© Ã  ton compte Google pour toujours.</p>
-    <input id="usernameInput" placeholder="Pseudo (2-20 caractÃ¨res)" maxlength="20" style="width:100%;text-align:center;font-size:18px;font-weight:700;letter-spacing:1px"/>
+    <p>Il sera lié à ton compte Google pour toujours.</p>
+    <input id="usernameInput" placeholder="Pseudo (2-20 caractères)" maxlength="20" style="width:100%;text-align:center;font-size:18px;font-weight:700;letter-spacing:1px"/>
     <div class="username-error" id="usernameError"></div>
-    <button class="btn-green" style="width:100%" onclick="submitUsername()">âœ… Valider</button>
+    <button class="btn-green" style="width:100%" onclick="submitUsername()">✅ Valider</button>
   </div>
 </div>
 
 <!-- MENU -->
 <div id="menuScreen" class="screen">
   <div class="logo">UNO</div>
-  <p style="color:rgba(255,255,255,.5);font-size:clamp(12px,2vw,15px);margin-bottom:12px;letter-spacing:2px">Ã‰DITION 3D</p>
+  <p style="color:rgba(255,255,255,.5);font-size:clamp(12px,2vw,15px);margin-bottom:12px;letter-spacing:2px">ÉDITION 3D</p>
   <div class="card-box">
     <div id="googleAuthBtn">
       <button class="btn-google" onclick="signInGoogle()" style="width:100%">
@@ -199,16 +199,16 @@ button:active{transform:scale(.96)!important}
       </button>
     </div>
     <div id="nameRow" style="display:flex;gap:8px;align-items:center">
-      <input id="nameInput" placeholder="Pseudo (anonyme par dÃ©faut)" maxlength="20" style="flex:1"/>
+      <input id="nameInput" placeholder="Pseudo (anonyme par défaut)" maxlength="20" style="flex:1"/>
     </div>
-    <button class="btn-red" onclick="startSolo()">ðŸŽ® Jouer contre les bots</button>
-    <button class="btn-blue" onclick="showCreate()">ðŸ  CrÃ©er une salle</button>
-    <button class="btn-green" onclick="showJoin()">ðŸ”— Rejoindre une salle</button>
+    <button class="btn-red" onclick="startSolo()">🎮 Jouer contre les bots</button>
+    <button class="btn-blue" onclick="showCreate()"> Créer une salle</button>
+    <button class="btn-green" onclick="showJoin()">🔗 Rejoindre une salle</button>
   </div>
   <div class="menu-nav">
-    <button class="nav-btn" onclick="openFriends()">ðŸ‘¥ Mes amis <span id="friendReqBadge" class="nav-badge" style="display:none">!</span></button>
-    <button class="nav-btn" onclick="openMessages()">ðŸ’¬ Messages <span id="msgBadge" class="nav-badge" style="display:none">!</span></button>
-    <button class="nav-btn" id="profileNavBtn" onclick="openOwnProfile()" style="display:none">ðŸ‘¤ Mon profil</button>
+    <button class="nav-btn" onclick="openFriends()">👥 Mes amis <span id="friendReqBadge" class="nav-badge" style="display:none">!</span></button>
+    <button class="nav-btn" onclick="openMessages()">💬 Messages <span id="msgBadge" class="nav-badge" style="display:none">!</span></button>
+    <button class="nav-btn" id="profileNavBtn" onclick="openOwnProfile()" style="display:none">👤 Mon profil</button>
     <button class="nav-btn" id="adminNavBtn" onclick="openAdminPanel()" style="display:none">Admin</button>
   </div>
 </div>
@@ -220,8 +220,8 @@ button:active{transform:scale(.96)!important}
     <p style="text-align:center;color:rgba(255,255,255,.5);font-size:13px">Partage ce code :</p>
     <div id="roomCode">----</div>
     <p style="text-align:center;color:rgba(255,255,255,.4);font-size:12px">En attente de joueurs...</p>
-    <button class="btn-green" onclick="startOnlineGame()">ðŸš€ DÃ©marrer la partie</button>
-    <button class="btn-ghost" onclick="backMenu()">â† Retour</button>
+    <button class="btn-green" onclick="startOnlineGame()">🚀 Démarrer la partie</button>
+    <button class="btn-ghost" onclick="backMenu()"> Retour</button>
   </div>
 </div>
 
@@ -230,8 +230,8 @@ button:active{transform:scale(.96)!important}
   <div class="logo" style="font-size:clamp(40px,8vw,70px);margin-bottom:20px">JOIN</div>
   <div class="card-box">
     <input id="joinCode" placeholder="Code de la salle" maxlength="4" style="text-align:center;font-size:clamp(20px,4vw,30px);font-weight:700;letter-spacing:8px"/>
-    <button class="btn-green" onclick="joinRoom()">âœ… Rejoindre</button>
-    <button class="btn-ghost" onclick="backMenu()">â† Retour</button>
+    <button class="btn-green" onclick="joinRoom()">✅ Rejoindre</button>
+    <button class="btn-ghost" onclick="backMenu()"> Retour</button>
   </div>
 </div>
 
@@ -259,20 +259,20 @@ button:active{transform:scale(.96)!important}
 
 <!-- COLOR PICKER -->
 <div id="colorPicker">
-  <h3>ðŸŽ¨ Choisir une couleur</h3>
+  <h3>🎨 Choisir une couleur</h3>
   <div class="color-grid">
-    <button class="color-btn c-red" onclick="pickColor('red')">ðŸ”´ Rouge</button>
-    <button class="color-btn c-blue" onclick="pickColor('blue')">ðŸ”µ Bleu</button>
-    <button class="color-btn c-green" onclick="pickColor('green')">ðŸŸ¢ Vert</button>
-    <button class="color-btn c-yellow" onclick="pickColor('yellow')">ðŸŸ¡ Jaune</button>
+    <button class="color-btn c-red" onclick="pickColor('red')">🔴 Rouge</button>
+    <button class="color-btn c-blue" onclick="pickColor('blue')">🔵 Bleu</button>
+    <button class="color-btn c-green" onclick="pickColor('green')">🟢 Vert</button>
+    <button class="color-btn c-yellow" onclick="pickColor('yellow')">🟡 Jaune</button>
   </div>
 </div>
 
 <!-- WINNER OVERLAY -->
 <div id="winnerOverlay">
-  <div class="winner-text" id="winnerText">ðŸ† Victoire !</div>
+  <div class="winner-text" id="winnerText"> Victoire !</div>
   <div style="color:rgba(255,255,255,.6);font-size:clamp(14px,2.5vw,20px)" id="winnerSub"></div>
-  <button class="btn-red" style="margin-top:10px;min-width:180px" onclick="location.reload()">ðŸ”„ Rejouer</button>
+  <button class="btn-red" style="margin-top:10px;min-width:180px" onclick="location.reload()">🔄 Rejouer</button>
 </div>
 
 <!-- NOTIF -->
@@ -283,7 +283,7 @@ button:active{transform:scale(.96)!important}
   <div class="panel-box">
     <div class="panel-header">
       <span class="panel-title" id="profilePanelTitle">Profil</span>
-      <button class="close-btn" onclick="closePanel('profilePanel')">âœ•</button>
+      <button class="close-btn" onclick="closePanel('profilePanel')">✕</button>
     </div>
     <div id="profileContent"></div>
   </div>
@@ -293,8 +293,8 @@ button:active{transform:scale(.96)!important}
 <div id="friendsPanel" class="overlay-panel">
   <div class="panel-box">
     <div class="panel-header">
-      <span class="panel-title">ðŸ‘¥ Mes amis</span>
-      <button class="close-btn" onclick="closePanel('friendsPanel')">âœ•</button>
+      <span class="panel-title">👥 Mes amis</span>
+      <button class="close-btn" onclick="closePanel('friendsPanel')">✕</button>
     </div>
     <div id="friendsContent"></div>
   </div>
@@ -304,8 +304,8 @@ button:active{transform:scale(.96)!important}
 <div id="messagesPanel" class="overlay-panel">
   <div class="panel-box">
     <div class="panel-header">
-      <span class="panel-title" id="msgPanelTitle">ðŸ’¬ Messages</span>
-      <button class="close-btn" onclick="closeMsgPanel()">âœ•</button>
+      <span class="panel-title" id="msgPanelTitle">💬 Messages</span>
+      <button class="close-btn" onclick="closeMsgPanel()">✕</button>
     </div>
     <div id="messagesContent"></div>
   </div>
@@ -445,34 +445,34 @@ window.signOutGoogle = async function() {
   await signOut(window._auth);
   window._currentUser = null;
   updateMenuForAnon();
-  showNotif('DÃ©connectÃ©', '#f5c800');
+  showNotif('Déconnecté', '#f5c800');
 };
 
 window.submitUsername = async function() {
   const val = document.getElementById('usernameInput').value.trim();
   const errEl = document.getElementById('usernameError');
   errEl.textContent = '';
-  if (!val || val.length < 2 || val.length > 20) { errEl.textContent = 'Pseudo invalide (2-20 caractÃ¨res)'; return; }
+  if (!val || val.length < 2 || val.length > 20) { errEl.textContent = 'Pseudo invalide (2-20 caractères)'; return; }
   const btn = document.querySelector('#usernameModal .btn-green');
-  if (btn) { btn.disabled = true; btn.textContent = 'â³ VÃ©rification...'; }
+  if (btn) { btn.disabled = true; btn.textContent = ' Vérification...'; }
   try {
     const chkData = await apiFetch('/api/users/check-username/' + encodeURIComponent(val));
     if (!chkData.available) {
-      errEl.textContent = chkData.reason || 'Ce pseudo est dÃ©jÃ  pris !';
-      if (btn) { btn.disabled = false; btn.textContent = 'âœ… Valider'; }
+      errEl.textContent = chkData.reason || 'Ce pseudo est déjà pris !';
+      if (btn) { btn.disabled = false; btn.textContent = '✅ Valider'; }
       return;
     }
     const fb = window._pendingFirebaseUser;
-    if (!fb) { errEl.textContent = 'Erreur : session expirÃ©e, reconnecte-toi.'; if (btn) { btn.disabled = false; btn.textContent = 'âœ… Valider'; } return; }
-    if (btn) btn.textContent = 'â³ CrÃ©ation...';
+    if (!fb) { errEl.textContent = 'Erreur : session expirée, reconnecte-toi.'; if (btn) { btn.disabled = false; btn.textContent = '✅ Valider'; } return; }
+    if (btn) btn.textContent = ' Création...';
     const data = await apiFetch('/api/users/google-auth', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ googleId: fb.uid, email: fb.email, displayName: fb.displayName, photoURL: fb.photoURL, username: val })
     });
     if (data.usernameTaken) {
-      errEl.textContent = 'Ce pseudo est dÃ©jÃ  pris !';
-      if (btn) { btn.disabled = false; btn.textContent = 'âœ… Valider'; }
+      errEl.textContent = 'Ce pseudo est déjà pris !';
+      if (btn) { btn.disabled = false; btn.textContent = '✅ Valider'; }
       return;
     }
     if (data.user) {
@@ -480,16 +480,16 @@ window.submitUsername = async function() {
       window._pendingFirebaseUser = null;
       document.getElementById('usernameModal').classList.remove('show');
       updateMenuForUser(data.user);
-      if (window.showNotif) window.showNotif('Bienvenue ' + val + ' ! ðŸŽ‰', '#2ec05e');
+      if (window.showNotif) window.showNotif('Bienvenue ' + val + ' ! 🎉', '#2ec05e');
       refreshBadges();
     } else {
-      errEl.textContent = 'RÃ©ponse inattendue du serveur, rÃ©essaie.';
-      if (btn) { btn.disabled = false; btn.textContent = 'âœ… Valider'; }
+      errEl.textContent = 'Réponse inattendue du serveur, réessaie.';
+      if (btn) { btn.disabled = false; btn.textContent = '✅ Valider'; }
     }
   } catch(e) {
     console.error('submitUsername error:', e);
-    errEl.textContent = 'Erreur rÃ©seau : ' + (e.message || 'rÃ©essaie dans un instant');
-    if (btn) { btn.disabled = false; btn.textContent = 'âœ… Valider'; }
+    errEl.textContent = 'Erreur réseau : ' + (e.message || 'réessaie dans un instant');
+    if (btn) { btn.disabled = false; btn.textContent = '✅ Valider'; }
   }
 };
 </script>
@@ -594,12 +594,12 @@ function updateMenuForAnon() {
 function updateMenuForUser(user) {
   const photo = user.photoURL
     ? `<img src="${user.photoURL}" style="width:22px;height:22px;border-radius:50%">`
-    : `<span style="font-size:18px">ðŸ‘¤</span>`;
+    : `<span style="font-size:18px">👤</span>`;
   document.getElementById('googleAuthBtn').innerHTML = `
     <div class="google-connected">
       ${photo}
-      <span>Connecte en tant que <b>${user.displayName || user.username}</b> ${levelBadge(user.level)} <small style="opacity:.65">@${user.username}</small>${user.verified ? ' âœ“' : ''}</span>
-      <button onclick="signOutGoogle()" style="background:rgba(255,255,255,.1);border:none;color:rgba(255,255,255,.6);border-radius:8px;padding:3px 8px;font-size:11px;cursor:pointer;margin-left:auto">DÃ©co</button>
+      <span>Connecte en tant que <b>${user.displayName || user.username}</b> ${levelBadge(user.level)} <small style="opacity:.65">@${user.username}</small>${user.verified ? ' ✓' : ''}</span>
+      <button onclick="signOutGoogle()" style="background:rgba(255,255,255,.1);border:none;color:rgba(255,255,255,.6);border-radius:8px;padding:3px 8px;font-size:11px;cursor:pointer;margin-left:auto">Déco</button>
     </div>`;
   document.getElementById('nameRow').style.display = 'none';
   document.getElementById('profileNavBtn').style.display = 'flex';
@@ -611,7 +611,7 @@ function showUsernameModal() {
   document.getElementById('usernameInput').focus();
 }
 
-// â”€â”€ PROFILE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── PROFILE ──────────────────────────────────────────────────────────────────
 async function openOwnProfile() {
   if (!window._currentUser) return;
   openProfile(window._currentUser.username);
@@ -633,7 +633,7 @@ async function openProfile(username) {
     const editBox = isMe ? `<div style="border-top:1px solid rgba(255,255,255,.08);padding-top:14px;display:flex;flex-direction:column;gap:8px"><div style="font-size:13px;font-weight:700;color:rgba(255,255,255,.5);letter-spacing:.5px">MODIFIER LE PROFIL</div><input id="profileDisplayName" value="${escHtml(user.displayName || user.username)}" maxlength="24" placeholder="Nom d'affichage"/><input id="profilePhotoURL" value="${escHtml(user.photoURL || '')}" placeholder="URL image de profil"/><input type="file" accept="image/*" onchange="profileFileToDataUrl(this)"/><button class="mini-btn" style="background:linear-gradient(160deg,#45d975,#2ec05e);color:#fff" onclick="updateOwnProfile()">Enregistrer</button></div>` : '';
     const games = (user.recentGames || []).slice(0, 5);
     const gamesHtml = games.length ? games.map(g => `<div class="game-item"><div><div style="font-size:13px;font-weight:700">${g.players ? g.players.map(escHtml).join(', ') : 'Partie'}</div><div class="game-date">${g.date ? new Date(g.date).toLocaleDateString('fr-FR') : ''}</div></div><span class="${g.winnerUsername === user.username || g.winner === user.username || g.winner === user.displayName ? 'result-win' : 'result-lose'}">${g.winnerUsername === user.username || g.winner === user.username || g.winner === user.displayName ? 'Victoire' : 'Defaite'}</span></div>`).join('') : '<p style="color:rgba(255,255,255,.4);font-size:13px;text-align:center">Aucune partie recente</p>';
-    document.getElementById('profileContent').innerHTML = `<div style="display:flex;align-items:center;gap:16px;margin-bottom:16px">${photo}<div style="flex:1"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span style="font-size:clamp(16px,3vw,22px);font-weight:900">${escHtml(user.displayName || user.username)}</span>${levelBadge(user.level)}${user.verified ? '<span class="verified-badge">✓ Verifie</span>' : ''}</div><div style="color:rgba(255,255,255,.5);font-size:12px;margin-top:2px">@${escHtml(user.username)} · ${Number(user.xp || 0)} XP · ${Number(user.gamesPlayed || 0)} parties · ${Number(user.wins || 0)} victoires</div><div style="color:rgba(255,255,255,.5);font-size:12px;margin-top:2px">${user.followers ? user.followers.length : 0} abonnes · ${user.following ? user.following.length : 0} abonnements</div><div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">${followBtn}${friendBtn}</div></div></div>${editBox}<div style="border-top:1px solid rgba(255,255,255,.08);padding-top:14px;margin-top:14px"><div style="font-size:13px;font-weight:700;color:rgba(255,255,255,.5);margin-bottom:10px;letter-spacing:.5px">PARTIES RECENTES</div><div style="display:flex;flex-direction:column;gap:8px">${gamesHtml}</div></div>`;
+    document.getElementById('profileContent').innerHTML = `<div style="display:flex;align-items:center;gap:16px;margin-bottom:16px">${photo}<div style="flex:1"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span style="font-size:clamp(16px,3vw,22px);font-weight:900">${escHtml(user.displayName || user.username)}</span>${levelBadge(user.level)}${user.verified ? '<span class="verified-badge"> Verifie</span>' : ''}</div><div style="color:rgba(255,255,255,.5);font-size:12px;margin-top:2px">@${escHtml(user.username)}  ${Number(user.xp || 0)} XP  ${Number(user.gamesPlayed || 0)} parties  ${Number(user.wins || 0)} victoires</div><div style="color:rgba(255,255,255,.5);font-size:12px;margin-top:2px">${user.followers ? user.followers.length : 0} abonnes  ${user.following ? user.following.length : 0} abonnements</div><div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">${followBtn}${friendBtn}</div></div></div>${editBox}<div style="border-top:1px solid rgba(255,255,255,.08);padding-top:14px;margin-top:14px"><div style="font-size:13px;font-weight:700;color:rgba(255,255,255,.5);margin-bottom:10px;letter-spacing:.5px">PARTIES RECENTES</div><div style="display:flex;flex-direction:column;gap:8px">${gamesHtml}</div></div>`;
   } catch(e) {
     console.error(e);
     document.getElementById('profileContent').innerHTML = '<p style="color:#e8304a">Erreur de chargement</p>';
@@ -671,7 +671,7 @@ async function toggleFollow(username, isFollowing) {
     window._currentUser.following = [...(window._currentUser.following || []), username];
   }
   openProfile(username);
-  showNotif(isFollowing ? 'Abonnement annulÃ©' : 'AbonnÃ© Ã  ' + username + ' !', '#2ec05e');
+  showNotif(isFollowing ? 'Abonnement annulé' : 'Abonné à ' + username + ' !', '#2ec05e');
 }
 
 async function sendFriendRequest(username) {
@@ -679,12 +679,12 @@ async function sendFriendRequest(username) {
   const r = await fetch(API + '/api/friends/request', { method: 'POST', headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ googleId: window._currentUser.googleId, targetUsername: username }) });
   const data = await r.json();
-  if (data.alreadyFriends) { showNotif('Vous Ãªtes dÃ©jÃ  amis !', '#f5c800'); return; }
-  showNotif('Demande envoyÃ©e Ã  ' + username + ' !', '#2ec05e');
+  if (data.alreadyFriends) { showNotif('Vous êtes déjà amis !', '#f5c800'); return; }
+  showNotif('Demande envoyée à ' + username + ' !', '#2ec05e');
   openProfile(username);
 }
 
-// â”€â”€ FRIENDS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── FRIENDS ──────────────────────────────────────────────────────────────────
 async function openFriends() {
   if (!window._currentUser) { showNotif('Connecte-toi avec Google pour voir tes amis !', '#f5c800'); return; }
   document.getElementById('friendsPanel').classList.add('show');
@@ -699,13 +699,13 @@ async function openFriends() {
         <div style="font-size:12px;font-weight:700;color:rgba(255,255,255,.4);margin-bottom:8px;letter-spacing:.5px">DEMANDES EN ATTENTE</div>
         ${requests.map(req => `
           <div class="req-item">
-            <span style="font-size:20px">ðŸ‘‹</span>
+            <span style="font-size:20px">👋</span>
             <div style="flex:1">
               <div style="font-weight:700;cursor:pointer;text-decoration:underline" onclick="closePanel('friendsPanel');openProfile('${req.from}')">${req.from}</div>
               <div style="font-size:11px;color:rgba(255,255,255,.4)">${new Date(req.date).toLocaleDateString('fr-FR')}</div>
             </div>
-            <button class="mini-btn" style="background:linear-gradient(160deg,#45d975,#2ec05e);color:#fff" onclick="acceptFriend('${req.from}')">âœ“</button>
-            <button class="mini-btn" style="background:rgba(255,0,0,.2);color:#e8304a;border:1px solid rgba(232,48,74,.3)" onclick="declineFriend('${req.from}')">âœ•</button>
+            <button class="mini-btn" style="background:linear-gradient(160deg,#45d975,#2ec05e);color:#fff" onclick="acceptFriend('${req.from}')">✓</button>
+            <button class="mini-btn" style="background:rgba(255,0,0,.2);color:#e8304a;border:1px solid rgba(232,48,74,.3)" onclick="declineFriend('${req.from}')">✕</button>
           </div>`).join('')}
       </div>` : '';
 
@@ -713,10 +713,10 @@ async function openFriends() {
       <div class="friend-item">
         <div class="friend-avatar">${f.username[0].toUpperCase()}</div>
         <div style="flex:1">
-          <div class="friend-name" style="cursor:pointer;text-decoration:underline" onclick="closePanel('friendsPanel');openProfile('${f.username}')">${f.username}${f.verified ? ' âœ“' : ''}</div>
+          <div class="friend-name" style="cursor:pointer;text-decoration:underline" onclick="closePanel('friendsPanel');openProfile('${f.username}')">${f.username}${f.verified ? ' ✓' : ''}</div>
         </div>
         <div class="friend-actions">
-          <button class="mini-btn" style="background:linear-gradient(160deg,#3a8de8,#2473cc);color:#fff" onclick="openChat('${f.username}')">ðŸ’¬</button>
+          <button class="mini-btn" style="background:linear-gradient(160deg,#3a8de8,#2473cc);color:#fff" onclick="openChat('${f.username}')">💬</button>
         </div>
       </div>`).join('') : '<p style="color:rgba(255,255,255,.4);font-size:13px;text-align:center;padding:10px">Aucun ami pour l\'instant</p>';
 
@@ -730,7 +730,7 @@ async function acceptFriend(fromUsername) {
   await fetch(API + '/api/friends/accept', { method: 'POST', headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ googleId: window._currentUser.googleId, fromUsername }) });
   window._currentUser.friends = [...(window._currentUser.friends || []), fromUsername];
-  showNotif(fromUsername + ' est maintenant ton ami ! ðŸŽ‰', '#2ec05e');
+  showNotif(fromUsername + ' est maintenant ton ami ! 🎉', '#2ec05e');
   openFriends(); refreshBadges();
 }
 
@@ -741,11 +741,11 @@ async function declineFriend(fromUsername) {
   openFriends(); refreshBadges();
 }
 
-// â”€â”€ MESSAGES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── MESSAGES ─────────────────────────────────────────────────────────────────
 async function openMessages() {
   if (!window._currentUser) { showNotif('Connecte-toi avec Google pour envoyer des messages !', '#f5c800'); return; }
   currentMsgFriend = null;
-  document.getElementById('msgPanelTitle').textContent = 'ðŸ’¬ Messages';
+  document.getElementById('msgPanelTitle').textContent = '💬 Messages';
   document.getElementById('messagesPanel').classList.add('show');
   // Show friend list to choose
   const r = await fetch(API + '/api/friends/' + window._currentUser.googleId);
@@ -755,7 +755,7 @@ async function openMessages() {
   const unread = unreadData.unread || {};
   const friends = data.friends || [];
   if (!friends.length) {
-    document.getElementById('messagesContent').innerHTML = '<p style="color:rgba(255,255,255,.4);font-size:13px;text-align:center;padding:20px">Ajoute des amis pour leur Ã©crire !</p>';
+    document.getElementById('messagesContent').innerHTML = '<p style="color:rgba(255,255,255,.4);font-size:13px;text-align:center;padding:20px">Ajoute des amis pour leur écrire !</p>';
     return;
   }
   document.getElementById('messagesContent').innerHTML = `
@@ -773,7 +773,7 @@ async function openMessages() {
 async function openChat(friendUsername) {
   closePanel('friendsPanel');
   currentMsgFriend = friendUsername;
-  document.getElementById('msgPanelTitle').textContent = 'ðŸ’¬ ' + friendUsername;
+  document.getElementById('msgPanelTitle').textContent = '💬 ' + friendUsername;
   document.getElementById('messagesPanel').classList.add('show');
   await loadMessages(friendUsername);
   if (msgPollInterval) clearInterval(msgPollInterval);
@@ -801,7 +801,7 @@ async function loadMessages(friendUsername, silent = false) {
       <div class="msg-list" id="msgList">${msgsHtml || '<p style="color:rgba(255,255,255,.4);font-size:13px;text-align:center;padding:20px">Commence la conversation !</p>'}</div>
       <div class="msg-input-row" style="margin-top:10px">
         <input id="msgInput" placeholder="Ton message..." maxlength="500" onkeydown="if(event.key==='Enter')sendMessage()"/>
-        <button class="msg-send-btn" onclick="sendMessage()">âž¤</button>
+        <button class="msg-send-btn" onclick="sendMessage()">➤</button>
       </div>`;
     const newInput = document.getElementById('msgInput');
     if (newInput && draft) {
@@ -957,7 +957,7 @@ async function saveGameResult(gs) {
   } catch(e) {}
 }
 
-// â”€â”€ GAME RENDER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── GAME RENDER ───────────────────────────────────────────────────────────────
 function renderGame() {
   const me = state.players.find(p => p.id === myId);
   if (!me) return;
@@ -965,7 +965,7 @@ function renderGame() {
   const myIndex = state.players.findIndex(p => p.id === myId);
   const isMyTurn = state.currentTurn === myIndex;
   const statusEl = document.getElementById('status');
-  statusEl.textContent = isMyTurn ? 'ðŸŽ¯ TON TOUR !' : 'â³ Tour adverse';
+  statusEl.textContent = isMyTurn ? '🎯 TON TOUR !' : ' Tour adverse';
   statusEl.className = isMyTurn ? 'my-turn' : '';
   document.getElementById('drawBtn').style.opacity = isMyTurn ? '1' : '0.5';
   document.getElementById('adminGameBtn').style.display = isAdminCurrentUser() ? 'inline-flex' : 'none';
@@ -980,7 +980,7 @@ function renderPlayers() {
     const canClick = !p.isBot && p.username;
     el.innerHTML = `<span class="dot"></span><span style="${canClick ? 'cursor:pointer;text-decoration:underline' : ''}"
       ${canClick ? `onclick="openProfile('${p.username}')"` : ''}>${p.name}</span>${levelBadge(p.level)}
-      ${p.verified ? '<span style="color:#60a0f0;font-size:11px;font-weight:800">✓</span>' : ''}
+      ${p.verified ? '<span style="color:#60a0f0;font-size:11px;font-weight:800"></span>' : ''}
       <span style="opacity:.6">(${p.handCount})</span>`;
     div.appendChild(el);
   });
@@ -1063,10 +1063,10 @@ function pickColor(color) {
 function drawCard() { socket.emit('drawCard', { code: roomCode }); }
 
 function getLabel(v) {
-  if (v === 'skip') return 'âŠ˜';
-  if (v === 'reverse') return 'â†º';
+  if (v === 'skip') return '⊘';
+  if (v === 'reverse') return '↺';
   if (v === 'draw2') return '+2';
-  if (v === 'wild') return 'â˜…';
+  if (v === 'wild') return '★';
   if (v === 'wild4') return '+4';
   return v;
 }
@@ -1086,14 +1086,14 @@ function showNotif(msg, color = 'rgba(255,255,255,.9)') {
 window.showNotif = showNotif;
 
 function showWinner(winner) {
-  document.getElementById('winnerText').textContent = winner === (window._currentUser?.username || '') || state.players.find(p => p.id === myId)?.name === winner ? 'ðŸ† Tu as gagnÃ© !!' : 'ðŸ˜ž ' + winner + ' a gagnÃ©';
+  document.getElementById('winnerText').textContent = winner === (window._currentUser?.username || '') || state.players.find(p => p.id === myId)?.name === winner ? ' Tu as gagné !!' : '😞 ' + winner + ' a gagné';
   document.getElementById('winnerSub').textContent = ''; 
   document.getElementById('winnerOverlay').classList.add('show');
   if (state.players.find(p => p.id === myId)?.name === winner) launchConfetti();
 }
 
 function launchConfetti() {
-  const emojis = ['ðŸŽ‰', 'ðŸŽŠ', 'â­', 'ðŸŒŸ', 'âœ¨', 'ðŸŽˆ', 'ðŸŽ€'];
+  const emojis = ['🎉', '🎊', '', '🌟', '✨', '🎈', '🎀'];
   for (let i = 0; i < 20; i++) {
     const el = document.createElement('div'); el.className = 'confetti';
     el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
