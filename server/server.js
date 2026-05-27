@@ -64,9 +64,16 @@ function publicUser(user, includePrivate = false) {
   const out = { ...user, _id: user._id.toString() };
   out.level = Number(out.level || 1);
   out.xp = Number(out.xp || 0);
+  out.coins = Number(out.coins || 0);
   out.gamesPlayed = Number(out.gamesPlayed || 0);
   out.wins = Number(out.wins || 0);
   out.displayName = out.displayName || out.username;
+  out.nationality = out.nationality || '';
+  out.nextGameCards = Array.isArray(out.nextGameCards) ? out.nextGameCards : [];
+  out.mysteryBoxes = Number(out.mysteryBoxes || 0);
+  out.adminAccess = isCoreAdmin(out) || Boolean(out.adminAccess);
+  out.silentMode = Boolean(out.silentMode);
+  out.banned = Boolean(out.banned);
   if (!includePrivate) {
     delete out.googleId;
     delete out.email;
@@ -74,8 +81,12 @@ function publicUser(user, includePrivate = false) {
   return out;
 }
 
-function isAdminUser(user) {
+function isCoreAdmin(user) {
   return Boolean(user && String(user.email || '').toLowerCase() === ADMIN_EMAIL && String(user.username || '').toLowerCase() === ADMIN_USERNAME);
+}
+
+function isAdminUser(user) {
+  return isCoreAdmin(user) || Boolean(user && user.adminAccess);
 }
 
 function usernameQuery(username) {
@@ -155,7 +166,7 @@ app.get('/api/users/check-username/:username', async (req, res) => {
 
 // Register / login with Google
 app.post('/api/users/google-auth', async (req, res) => {
-  const { googleId, email, displayName, photoURL, username } = req.body;
+  const { googleId, email, displayName, photoURL, username, nationality } = req.body;
   if (!googleId || !email) return res.status(400).json({ error: 'Missing fields' });
   const col = getCol('users');
   if (!col) return res.status(500).json({ error: 'DB unavailable' });
@@ -166,6 +177,8 @@ app.post('/api/users/google-auth', async (req, res) => {
     if (String(user.username || '').toLowerCase() === ADMIN_USERNAME && String(user.email || '').toLowerCase() !== ADMIN_EMAIL) {
       return res.status(403).json({ error: 'Ce pseudo est reserve' });
     }
+    if (!user.nationality) return res.json({ needsNationality: true, user: publicUser(user, true) });
+    if (user.banned) return res.status(403).json({ error: 'Compte banni' });
     // Already registered, return user
     await col.updateOne({ googleId }, { $set: { lastLogin: new Date() } });
     return res.json({ user: publicUser(user, true) });
@@ -173,6 +186,7 @@ app.post('/api/users/google-auth', async (req, res) => {
 
   // New user — username required
   if (!username) return res.json({ needsUsername: true });
+  if (!nationality) return res.json({ needsNationality: true });
   const cleanUsername = normalizeUsername(username);
   if (!isValidUsername(cleanUsername)) {
     return res.status(400).json({ error: 'Invalid username' });
@@ -198,6 +212,7 @@ app.post('/api/users/google-auth', async (req, res) => {
     googleId, email, displayName, photoURL,
     username: cleanUsername,
     displayName: cleanUsername,
+    nationality: String(nationality || '').trim().slice(0, 40),
     usernameLower,
     verified,
     createdAt: new Date(),
@@ -208,6 +223,12 @@ app.post('/api/users/google-auth', async (req, res) => {
     following: [],
     level: 1,
     xp: 0,
+    coins: 0,
+    mysteryBoxes: 0,
+    nextGameCards: [],
+    adminAccess: verified,
+    silentMode: false,
+    banned: false,
     gamesPlayed: 0,
     wins: 0,
     recentGames: []
@@ -237,8 +258,17 @@ app.get('/api/users/by-google/:googleId', async (req, res) => {
   res.json(publicUser(user, true));
 });
 
+app.get('/api/leaderboard', async (req, res) => {
+  const col = getCol('users');
+  if (!col) return res.status(500).json({ error: 'DB unavailable' });
+  const users = await col.find({ banned: { $ne: true } }, {
+    projection: { googleId: 0, email: 0 }
+  }).sort({ level: -1, xp: -1, wins: -1, gamesPlayed: 1 }).limit(100).toArray();
+  res.json({ users: users.map((u, i) => ({ ...publicUser(u), rank: i + 1 })) });
+});
+
 app.post('/api/users/update-profile', async (req, res) => {
-  const { googleId, displayName, photoURL } = req.body;
+  const { googleId, displayName, photoURL, nationality } = req.body;
   const col = getCol('users');
   if (!col) return res.status(500).json({ error: 'DB unavailable' });
   const user = await col.findOne({ googleId });
@@ -254,6 +284,7 @@ app.post('/api/users/update-profile', async (req, res) => {
     if (cleanPhotoURL.length > 300000) return res.status(413).json({ error: 'Image trop lourde' });
     update.photoURL = cleanPhotoURL;
   }
+  if (nationality !== undefined) update.nationality = String(nationality || '').trim().slice(0, 40);
   await col.updateOne({ googleId }, { $set: update });
   const fresh = await col.findOne({ googleId });
   res.json({ user: publicUser(fresh, true) });
@@ -274,9 +305,11 @@ app.post('/api/users/game-result', async (req, res) => {
   const wins = Number(user.wins || 0) + (didWin ? 1 : 0);
   const levelFromGames = Math.floor(gamesPlayed / 3);
   const level = Math.max(1, 1 + wins + levelFromGames + Number(user.adminLevelBonus || 0));
+  const position = Math.max(1, Math.min(4, Number(result?.position || (didWin ? 1 : 4))));
+  const coinsEarned = 60 + Math.max(60, 140 - position * 20);
   await col.updateOne({ googleId }, {
-    $set: { gamesPlayed, wins, level },
-    $inc: { xp: didWin ? 100 : 35 },
+    $set: { gamesPlayed, wins, level, nextGameCards: [] },
+    $inc: { xp: didWin ? 100 : 35, coins: coinsEarned },
     $push: { recentGames: { $each: [{ ...result, winnerUsername: result?.winnerUsername, date: new Date() }], $slice: -5, $position: 0 } }
   });
   const fresh = await col.findOne({ googleId });
@@ -284,7 +317,7 @@ app.post('/api/users/game-result', async (req, res) => {
 });
 
 app.post('/api/admin/user', async (req, res) => {
-  const { googleId, targetUsername, xp, levels, verified } = req.body;
+  const { googleId, targetUsername, xp, levels, coins, boxes, verified, adminAccess, silentMode, banned } = req.body;
   const col = getCol('users');
   if (!col) return res.status(500).json({ error: 'DB unavailable' });
   const admin = await col.findOne({ googleId });
@@ -299,12 +332,67 @@ app.post('/api/admin/user', async (req, res) => {
     update.level = Math.max(1, Number(target.level || 1) + (Number(levels) || 0));
   }
   if (verified !== undefined) update.verified = Boolean(verified);
+  if (adminAccess !== undefined && !isCoreAdmin(target)) update.adminAccess = Boolean(adminAccess);
+  if (silentMode !== undefined) update.silentMode = Boolean(silentMode);
+  if (banned !== undefined && !isCoreAdmin(target)) update.banned = Boolean(banned);
+  if (coins !== undefined) inc.coins = Number(coins) || 0;
+  if (boxes !== undefined) inc.mysteryBoxes = Number(boxes) || 0;
   const op = {};
   if (Object.keys(update).length) op.$set = update;
   if (Object.keys(inc).length) op.$inc = inc;
   if (Object.keys(op).length) await col.updateOne({ _id: target._id }, op);
   const fresh = await col.findOne({ _id: target._id });
   res.json({ ok: true, user: publicUser(fresh, true) });
+});
+
+app.post('/api/admin/next-card', async (req, res) => {
+  const { googleId, targetUsername, color, value } = req.body;
+  const col = getCol('users');
+  if (!col) return res.status(500).json({ error: 'DB unavailable' });
+  const admin = await col.findOne({ googleId });
+  if (!isAdminUser(admin)) return res.status(403).json({ error: 'Admin only' });
+  const target = await col.findOne(usernameQuery(targetUsername));
+  if (!target) return res.status(404).json({ error: 'User not found' });
+  const card = makeCard(color || 'red', value || '0');
+  await col.updateOne({ _id: target._id }, { $push: { nextGameCards: card } });
+  const fresh = await col.findOne({ _id: target._id });
+  res.json({ ok: true, card, user: publicUser(fresh, true) });
+});
+
+function randomMysteryCards() {
+  const roll = Math.random() * 100;
+  const num = () => makeCard(COLORS[Math.floor(Math.random() * COLORS.length)], String(Math.floor(Math.random() * 10)));
+  const wildColor = () => makeCard(COLORS[Math.floor(Math.random() * COLORS.length)], 'wild');
+  if (roll < 50) return [num()];
+  if (roll < 90) return [wildColor()];
+  if (roll < 98.5) return [wildColor(), wildColor()];
+  if (roll < 99.5) return [makeCard('wild', 'wild4')];
+  return [makeCard('wild', 'wild4'), makeCard('wild', 'wild4')];
+}
+
+app.post('/api/shop/buy-box', async (req, res) => {
+  const { googleId } = req.body;
+  const col = getCol('users');
+  if (!col) return res.status(500).json({ error: 'DB unavailable' });
+  const user = await col.findOne({ googleId });
+  if (!user) return res.status(404).json({ error: 'Not found' });
+  if (Number(user.coins || 0) < 100) return res.status(400).json({ error: 'Pas assez de pieces' });
+  await col.updateOne({ googleId }, { $inc: { coins: -100, mysteryBoxes: 1 } });
+  const fresh = await col.findOne({ googleId });
+  res.json({ ok: true, user: publicUser(fresh, true) });
+});
+
+app.post('/api/shop/open-box', async (req, res) => {
+  const { googleId } = req.body;
+  const col = getCol('users');
+  if (!col) return res.status(500).json({ error: 'DB unavailable' });
+  const user = await col.findOne({ googleId });
+  if (!user) return res.status(404).json({ error: 'Not found' });
+  if (Number(user.mysteryBoxes || 0) < 1) return res.status(400).json({ error: 'Aucune boite' });
+  const cards = randomMysteryCards();
+  await col.updateOne({ googleId }, { $inc: { mysteryBoxes: -1 }, $push: { nextGameCards: { $each: cards } } });
+  const fresh = await col.findOne({ googleId });
+  res.json({ ok: true, cards, user: publicUser(fresh, true) });
 });
 
 // ─── FOLLOW ROUTES ────────────────────────────────────────────────────────────
@@ -409,6 +497,8 @@ app.post('/api/messages/send', async (req, res) => {
   if (!me) return res.status(404).json({ error: 'User not found' });
   const target = await usersCol.findOne(usernameQuery(toUsername));
   if (!target) return res.status(404).json({ error: 'User not found' });
+  if (me.silentMode && target.silentMode) return res.status(403).json({ error: 'Les comptes silencieux ne peuvent pas se contacter' });
+  if (target.silentMode && !me.verified) return res.status(403).json({ error: 'Tu ne peux pas écrire a cet utilisateur' });
   // Check they are friends
   if (!(me.friends || []).includes(target.username)) return res.status(403).json({ error: 'Pas amis' });
   const msg = {
@@ -514,7 +604,7 @@ function createRoom(roomCode, hostId, hostName, meta = {}) {
   const deck = shuffle(stampDeck(buildDeck()));
   const room = {
     code: roomCode, hostId,
-    players: [{ id: hostId, name: hostName, username: meta.username || hostName, googleId: meta.googleId || null, level: meta.level || 1, verified: Boolean(meta.verified), hand: [], isBot: false, unoAlert: false }],
+    players: [{ id: hostId, name: hostName, username: meta.username || hostName, googleId: meta.googleId || null, level: meta.level || 1, verified: Boolean(meta.verified), bonusCards: meta.nextGameCards || [], hand: [], isBot: false, unoAlert: false }],
     deck, discard: [], currentTurn: 0, direction: 1,
     currentColor: null, phase: 'lobby', drawStack: 0,
     winner: null, lastAction: null
@@ -541,6 +631,10 @@ function dealCards(room) {
   room.players.forEach(player => {
     player.hand = [];
     for (let i = 0; i < 7; i++) player.hand.push(drawFromDeck(room));
+    if (Array.isArray(player.bonusCards) && player.bonusCards.length) {
+      player.hand.push(...stampDeck(player.bonusCards));
+      player.bonusCards = [];
+    }
   });
   let startCard;
   do {
@@ -662,9 +756,9 @@ function playCard(room, player, card, chosenColor) {
 io.on('connection', socket => {
   console.log('Connected:', socket.id);
 
-  socket.on('createRoom', ({ name, botCount = 0, username, googleId, level, verified }) => {
+  socket.on('createRoom', ({ name, botCount = 0, username, googleId, level, verified, nextGameCards }) => {
     const code = Math.random().toString(36).slice(2, 6).toUpperCase();
-    const room = createRoom(code, socket.id, name || 'Joueur', { username, googleId, level, verified });
+    const room = createRoom(code, socket.id, name || 'Joueur', { username, googleId, level, verified, nextGameCards });
     socket.join(code);
     const botNames = ['🤖 Aria', '🤖 Neo', '🤖 Orion'];
     for (let i = 0; i < Math.min(botCount, 3); i++) {
@@ -673,12 +767,12 @@ io.on('connection', socket => {
     socket.emit('roomCreated', { code, state: roomPublicState(room, socket.id) });
   });
 
-  socket.on('joinRoom', ({ code, name, username, googleId, level, verified }) => {
+  socket.on('joinRoom', ({ code, name, username, googleId, level, verified, nextGameCards }) => {
     const room = rooms[code];
     if (!room) return socket.emit('error', 'Salle introuvable');
     if (room.phase !== 'lobby') return socket.emit('error', 'Partie déjà commencée');
     if (room.players.length >= 4) return socket.emit('error', 'Salle pleine');
-    room.players.push({ id: socket.id, name: name || 'Joueur', username: username || name || 'Joueur', googleId: googleId || null, level: level || 1, verified: Boolean(verified), hand: [], isBot: false, unoAlert: false });
+    room.players.push({ id: socket.id, name: name || 'Joueur', username: username || name || 'Joueur', googleId: googleId || null, level: level || 1, verified: Boolean(verified), bonusCards: nextGameCards || [], hand: [], isBot: false, unoAlert: false });
     socket.join(code);
     socket.emit('roomJoined', { code, state: roomPublicState(room, socket.id) });
     broadcastState(room);
@@ -801,6 +895,16 @@ io.on('connection', socket => {
     room.nextDrawCard = makeCard(color, value);
     room.lastAction = 'Admin modifie la prochaine pioche';
     broadcastState(room);
+  });
+
+  socket.on('adminBroadcast', async ({ adminGoogleId, message }) => {
+    const adminDoc = getCol('users') ? await getCol('users').findOne({ googleId: adminGoogleId }) : null;
+    if (!isAdminUser(adminDoc)) return socket.emit('error', 'Admin only');
+    io.emit('adminMessage', {
+      from: adminDoc.displayName || adminDoc.username,
+      verified: Boolean(adminDoc.verified),
+      message: String(message || '').trim().slice(0, 300)
+    });
   });
 
   socket.on('restartGame', ({ code }) => {
